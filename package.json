@@ -2,11 +2,14 @@
   "name": "maildog",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "bin": {
+    "email-masking": "bin/email-masking.js"
+  },
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "npx is-ci || husky install",
+    "type-checking": "tsc --noEmit",
     "format-checking": "prettier --check .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -19,16 +22,22 @@
   },
   "homepage": "https://github.com/edmundhung/maildog#readme",
   "devDependencies": {
+    "@aws-cdk/assert": "^1.108.1",
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/git": "^9.0.0",
+    "@types/aws-lambda": "^8.10.77",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^14.17.3",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^6.0.0",
+    "jest": "^26.6.3",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.1",
-    "semantic-release": "^17.4.3"
+    "semantic-release": "^17.4.3",
+    "ts-jest": "^26.5.6"
   },
   "config": {
     "commitizen": {
@@ -37,5 +46,19 @@
   },
   "lint-staged": {
     "*.{ts,js,json,md}": "prettier --write"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-iam": "^1.108.1",
+    "@aws-cdk/aws-lambda-nodejs": "^1.108.1",
+    "@aws-cdk/aws-s3": "^1.108.1",
+    "@aws-cdk/aws-ses": "^1.108.1",
+    "@aws-cdk/aws-ses-actions": "^1.108.1",
+    "@aws-cdk/core": "^1.108.1",
+    "aws-cdk": "^1.108.1",
+    "aws-lambda-ses-forwarder": "^5.0.0",
+    "esbuild": "^0.12.8",
+    "source-map-support": "^0.5.19",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.2"
   }
 }
