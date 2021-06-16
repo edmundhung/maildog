@@ -7,6 +7,7 @@ on:
 jobs:
   release:
     name: Release
+    if: ${{ github.repository == 'edmundhung/maildog' }}
     runs-on: ubuntu-latest
     steps:
       - name: Set up Node
@@ -27,7 +28,7 @@ jobs:
             ${{ runner.OS }}-
 
       - name: Install dependencies
-        run: npm ci --ignore-script
+        run: npm ci
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v3
@@ -36,6 +37,8 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git-user-signingkey: true
           git-commit-gpgsign: true
+          git-tag-gpgsign: true
+          git-push-gpgsign: true
 
       - name: Release
         env:
