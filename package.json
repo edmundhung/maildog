@@ -22,6 +22,8 @@
   },
   "homepage": "https://github.com/edmundhung/maildog#readme",
   "devDependencies": {
+    "@actions/core": "^1.4.0",
+    "@actions/github": "^5.0.0",
     "@aws-cdk/assert": "^1.108.1",
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
@@ -32,12 +34,15 @@
     "@types/node": "^14.17.3",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
+    "execa": "^5.1.1",
     "husky": "^6.0.0",
     "jest": "^26.6.3",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.1",
     "semantic-release": "^17.4.3",
-    "ts-jest": "^26.5.6"
+    "toml": "^3.0.0",
+    "ts-jest": "^26.5.6",
+    "yaml": "^1.10.2"
   },
   "config": {
     "commitizen": {
