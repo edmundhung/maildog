@@ -58,6 +58,8 @@
     "@aws-cdk/aws-s3": "^1.108.1",
     "@aws-cdk/aws-ses": "^1.108.1",
     "@aws-cdk/aws-ses-actions": "^1.108.1",
+    "@aws-cdk/aws-sns": "^1.108.1",
+    "@aws-cdk/aws-sns-subscriptions": "^1.108.1",
     "@aws-cdk/core": "^1.108.1",
     "aws-cdk": "^1.108.1",
     "aws-lambda-ses-forwarder": "^5.0.0",

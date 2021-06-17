@@ -3,12 +3,13 @@ import * as iam from '@aws-cdk/aws-iam';
 import * as lambda from '@aws-cdk/aws-lambda-nodejs';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as ses from '@aws-cdk/aws-ses';
-import * as actions from '@aws-cdk/aws-ses-actions';
+import * as sesActions from '@aws-cdk/aws-ses-actions';
+import * as sns from '@aws-cdk/aws-sns';
+import * as snsSubscriptions from '@aws-cdk/aws-sns-subscriptions';
+import * as sqs from '@aws-cdk/aws-sqs';
 import * as path from 'path';
 
 interface MailDogConfig {
-  domain: string;
-  emailKeyPrefix: string;
   fromEmail?: string;
   forwardMapping: Record<string, string[]>;
 }
@@ -22,28 +23,43 @@ export class MailDogStack extends cdk.Stack {
     super(scope, id, props);
 
     // The code that defines your stack goes here
-    const bucket = new s3.Bucket(this, 'MailDogBucket');
-    const dispatcherFunction = new lambda.NodejsFunction(
-      this,
-      'MailDogDispatcher',
-      {
-        entry: path.resolve(__dirname, './maildog-stack.dispatcher.ts'),
-        bundling: {
-          minify: true,
-          sourceMap: false,
-          define: {
-            'process.env.CONFIG': JSON.stringify(props.config),
-          },
+    const bucket = new s3.Bucket(this, 'MailDogBucket', {
+      lifecycleRules: [
+        {
+          expiration: cdk.Duration.days(365),
+          transitions: [
+            {
+              storageClass: s3.StorageClass.INFREQUENT_ACCESS,
+              transitionAfter: cdk.Duration.days(30),
+            },
+            {
+              storageClass: s3.StorageClass.GLACIER,
+              transitionAfter: cdk.Duration.days(90),
+            },
+          ],
         },
-        environment: {
-          EMAIL_BUCKET: bucket.bucketName,
+      ],
+    });
+    const mailFeed = new sns.Topic(this, 'MailDogMailFeed');
+    const deadLetterQueue = new sqs.Queue(this, 'MailDogDeadLetterQueue', {
+      retentionPeriod: cdk.Duration.days(14),
+    });
+    const dispatcher = new lambda.NodejsFunction(this, 'MailDogDispatcher', {
+      entry: path.resolve(__dirname, './maildog-stack.dispatcher.ts'),
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        define: {
+          'process.env.CONFIG': JSON.stringify(props.config),
         },
-        timeout: cdk.Duration.seconds(5),
-        memorySize: 128,
       },
-    );
-    const policy = new iam.Policy(this, 'MailDogPolicy', {
-      statements: [
+      environment: {
+        EMAIL_BUCKET: bucket.bucketName,
+      },
+      timeout: cdk.Duration.seconds(5),
+      memorySize: 128,
+      deadLetterQueue,
+      initialPolicy: [
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           resources: ['arn:aws:logs:*:*:*'],
@@ -65,24 +81,26 @@ export class MailDogStack extends cdk.Stack {
         }),
       ],
     });
-    new ses.ReceiptRuleSet(this, 'MailDogReceiptRuleSet', {
+    const ruleset = new ses.ReceiptRuleSet(this, 'MailDogReceiptRuleSet', {
       dropSpam: true,
       rules: [
         {
           enabled: true,
           actions: [
-            new actions.S3({
+            new sesActions.S3({
               bucket,
-              objectKeyPrefix: props.config.emailKeyPrefix,
-            }),
-            new actions.Lambda({
-              function: dispatcherFunction,
+              topic: mailFeed,
             }),
           ],
         },
       ],
     });
 
-    dispatcherFunction.role?.attachInlinePolicy(policy);
+    ruleset.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    mailFeed.addSubscription(
+      new snsSubscriptions.LambdaSubscription(dispatcher, {
+        deadLetterQueue,
+      }),
+    );
   }
 }
