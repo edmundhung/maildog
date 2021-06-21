@@ -41,7 +41,7 @@ test('Stack Snapshot', () => {
         },
       },
       "Resources": Object {
-        "MailDogBucketA54A602D": Object {
+        "Bucket83908E77": Object {
           "DeletionPolicy": "Retain",
           "Properties": Object {
             "LifecycleConfiguration": Object {
@@ -66,10 +66,10 @@ test('Stack Snapshot', () => {
           "Type": "AWS::S3::Bucket",
           "UpdateReplacePolicy": "Retain",
         },
-        "MailDogBucketPolicy55ED7577": Object {
+        "BucketPolicyE9A3008A": Object {
           "Properties": Object {
             "Bucket": Object {
-              "Ref": "MailDogBucketA54A602D",
+              "Ref": "Bucket83908E77",
             },
             "PolicyDocument": Object {
               "Statement": Array [
@@ -92,7 +92,7 @@ test('Stack Snapshot', () => {
                       Array [
                         Object {
                           "Fn::GetAtt": Array [
-                            "MailDogBucketA54A602D",
+                            "Bucket83908E77",
                             "Arn",
                           ],
                         },
@@ -107,7 +107,7 @@ test('Stack Snapshot', () => {
           },
           "Type": "AWS::S3::BucketPolicy",
         },
-        "MailDogDeadLetterQueueAE7B460C": Object {
+        "DeadLetterQueue9F481546": Object {
           "DeletionPolicy": "Delete",
           "Properties": Object {
             "MessageRetentionPeriod": 1209600,
@@ -115,7 +115,7 @@ test('Stack Snapshot', () => {
           "Type": "AWS::SQS::Queue",
           "UpdateReplacePolicy": "Delete",
         },
-        "MailDogDeadLetterQueuePolicyB4DCDEEA": Object {
+        "DeadLetterQueuePolicyB1FB890C": Object {
           "Properties": Object {
             "PolicyDocument": Object {
               "Statement": Array [
@@ -124,7 +124,7 @@ test('Stack Snapshot', () => {
                   "Condition": Object {
                     "ArnEquals": Object {
                       "aws:SourceArn": Object {
-                        "Ref": "MailDogMailFeed65FBE969",
+                        "Ref": "MailFeedF42B1B20",
                       },
                     },
                   },
@@ -134,7 +134,7 @@ test('Stack Snapshot', () => {
                   },
                   "Resource": Object {
                     "Fn::GetAtt": Array [
-                      "MailDogDeadLetterQueueAE7B460C",
+                      "DeadLetterQueue9F481546",
                       "Arn",
                     ],
                   },
@@ -144,32 +144,32 @@ test('Stack Snapshot', () => {
             },
             "Queues": Array [
               Object {
-                "Ref": "MailDogDeadLetterQueueAE7B460C",
+                "Ref": "DeadLetterQueue9F481546",
               },
             ],
           },
           "Type": "AWS::SQS::QueuePolicy",
         },
-        "MailDogDispatcherAllowInvokeExampleStackMailDogMailFeedC9BE96BA67756E55": Object {
+        "DispatcherAllowInvokeExampleStackMailFeedEF88B62C5E5A79A7": Object {
           "Properties": Object {
             "Action": "lambda:InvokeFunction",
             "FunctionName": Object {
               "Fn::GetAtt": Array [
-                "MailDogDispatcherC9E0EA30",
+                "DispatcherD4A12972",
                 "Arn",
               ],
             },
             "Principal": "sns.amazonaws.com",
             "SourceArn": Object {
-              "Ref": "MailDogMailFeed65FBE969",
+              "Ref": "MailFeedF42B1B20",
             },
           },
           "Type": "AWS::Lambda::Permission",
         },
-        "MailDogDispatcherC9E0EA30": Object {
+        "DispatcherD4A12972": Object {
           "DependsOn": Array [
-            "MailDogDispatcherServiceRoleDefaultPolicyBC1AC442",
-            "MailDogDispatcherServiceRole0FFAAEAE",
+            "DispatcherServiceRoleDefaultPolicyDA413007",
+            "DispatcherServiceRole904BCD09",
           ],
           "Properties": Object {
             "Code": Object {
@@ -213,7 +213,7 @@ test('Stack Snapshot', () => {
             "DeadLetterConfig": Object {
               "TargetArn": Object {
                 "Fn::GetAtt": Array [
-                  "MailDogDeadLetterQueueAE7B460C",
+                  "DeadLetterQueue9F481546",
                   "Arn",
                 ],
               },
@@ -227,7 +227,7 @@ test('Stack Snapshot', () => {
             "MemorySize": 128,
             "Role": Object {
               "Fn::GetAtt": Array [
-                "MailDogDispatcherServiceRole0FFAAEAE",
+                "DispatcherServiceRole904BCD09",
                 "Arn",
               ],
             },
@@ -236,11 +236,11 @@ test('Stack Snapshot', () => {
           },
           "Type": "AWS::Lambda::Function",
         },
-        "MailDogDispatcherMailDogMailFeed25151053": Object {
+        "DispatcherMailFeed5E0BDAD7": Object {
           "Properties": Object {
             "Endpoint": Object {
               "Fn::GetAtt": Array [
-                "MailDogDispatcherC9E0EA30",
+                "DispatcherD4A12972",
                 "Arn",
               ],
             },
@@ -248,18 +248,18 @@ test('Stack Snapshot', () => {
             "RedrivePolicy": Object {
               "deadLetterTargetArn": Object {
                 "Fn::GetAtt": Array [
-                  "MailDogDeadLetterQueueAE7B460C",
+                  "DeadLetterQueue9F481546",
                   "Arn",
                 ],
               },
             },
             "TopicArn": Object {
-              "Ref": "MailDogMailFeed65FBE969",
+              "Ref": "MailFeedF42B1B20",
             },
           },
           "Type": "AWS::SNS::Subscription",
         },
-        "MailDogDispatcherServiceRole0FFAAEAE": Object {
+        "DispatcherServiceRole904BCD09": Object {
           "Properties": Object {
             "AssumeRolePolicyDocument": Object {
               "Statement": Array [
@@ -290,7 +290,7 @@ test('Stack Snapshot', () => {
           },
           "Type": "AWS::IAM::Role",
         },
-        "MailDogDispatcherServiceRoleDefaultPolicyBC1AC442": Object {
+        "DispatcherServiceRoleDefaultPolicyDA413007": Object {
           "Properties": Object {
             "PolicyDocument": Object {
               "Statement": Array [
@@ -320,7 +320,7 @@ test('Stack Snapshot', () => {
                       Array [
                         Object {
                           "Fn::GetAtt": Array [
-                            "MailDogBucketA54A602D",
+                            "Bucket83908E77",
                             "Arn",
                           ],
                         },
@@ -334,7 +334,7 @@ test('Stack Snapshot', () => {
                   "Effect": "Allow",
                   "Resource": Object {
                     "Fn::GetAtt": Array [
-                      "MailDogDeadLetterQueueAE7B460C",
+                      "DeadLetterQueue9F481546",
                       "Arn",
                     ],
                   },
@@ -342,24 +342,24 @@ test('Stack Snapshot', () => {
               ],
               "Version": "2012-10-17",
             },
-            "PolicyName": "MailDogDispatcherServiceRoleDefaultPolicyBC1AC442",
+            "PolicyName": "DispatcherServiceRoleDefaultPolicyDA413007",
             "Roles": Array [
               Object {
-                "Ref": "MailDogDispatcherServiceRole0FFAAEAE",
+                "Ref": "DispatcherServiceRole904BCD09",
               },
             ],
           },
           "Type": "AWS::IAM::Policy",
         },
-        "MailDogMailFeed65FBE969": Object {
+        "MailFeedF42B1B20": Object {
           "Type": "AWS::SNS::Topic",
         },
-        "MailDogReceiptRuleSetC2DA2BC6": Object {
+        "ReceiptRuleSetD3CCC994": Object {
           "DeletionPolicy": "Delete",
           "Type": "AWS::SES::ReceiptRuleSet",
           "UpdateReplacePolicy": "Delete",
         },
-        "MailDogReceiptRuleSetDropSpamRule0A4E4508": Object {
+        "ReceiptRuleSetDropSpamRule1C768923": Object {
           "Properties": Object {
             "Rule": Object {
               "Actions": Array [
@@ -379,14 +379,14 @@ test('Stack Snapshot', () => {
               "ScanEnabled": true,
             },
             "RuleSetName": Object {
-              "Ref": "MailDogReceiptRuleSetC2DA2BC6",
+              "Ref": "ReceiptRuleSetD3CCC994",
             },
           },
           "Type": "AWS::SES::ReceiptRule",
         },
-        "MailDogReceiptRuleSetRule09B7EE5C7": Object {
+        "ReceiptRuleSetRule01CA7709C": Object {
           "DependsOn": Array [
-            "MailDogBucketPolicy55ED7577",
+            "BucketPolicyE9A3008A",
           ],
           "Properties": Object {
             "Rule": Object {
@@ -394,11 +394,11 @@ test('Stack Snapshot', () => {
                 Object {
                   "S3Action": Object {
                     "BucketName": Object {
-                      "Ref": "MailDogBucketA54A602D",
+                      "Ref": "Bucket83908E77",
                     },
                     "ObjectKeyPrefix": "emails/",
                     "TopicArn": Object {
-                      "Ref": "MailDogMailFeed65FBE969",
+                      "Ref": "MailFeedF42B1B20",
                     },
                   },
                 },
@@ -406,7 +406,7 @@ test('Stack Snapshot', () => {
               "Enabled": true,
             },
             "RuleSetName": Object {
-              "Ref": "MailDogReceiptRuleSetC2DA2BC6",
+              "Ref": "ReceiptRuleSetD3CCC994",
             },
           },
           "Type": "AWS::SES::ReceiptRule",

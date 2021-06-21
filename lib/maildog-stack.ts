@@ -23,7 +23,7 @@ export class MailDogStack extends cdk.Stack {
     super(scope, id, props);
 
     // The code that defines your stack goes here
-    const bucket = new s3.Bucket(this, 'MailDogBucket', {
+    const bucket = new s3.Bucket(this, 'Bucket', {
       lifecycleRules: [
         {
           expiration: cdk.Duration.days(365),
@@ -40,11 +40,11 @@ export class MailDogStack extends cdk.Stack {
         },
       ],
     });
-    const mailFeed = new sns.Topic(this, 'MailDogMailFeed');
-    const deadLetterQueue = new sqs.Queue(this, 'MailDogDeadLetterQueue', {
+    const mailFeed = new sns.Topic(this, 'MailFeed');
+    const deadLetterQueue = new sqs.Queue(this, 'DeadLetterQueue', {
       retentionPeriod: cdk.Duration.days(14),
     });
-    const dispatcher = new lambda.NodejsFunction(this, 'MailDogDispatcher', {
+    const dispatcher = new lambda.NodejsFunction(this, 'Dispatcher', {
       entry: path.resolve(__dirname, './maildog-stack.dispatcher.ts'),
       bundling: {
         minify: true,
@@ -78,7 +78,7 @@ export class MailDogStack extends cdk.Stack {
         }),
       ],
     });
-    const ruleset = new ses.ReceiptRuleSet(this, 'MailDogReceiptRuleSet', {
+    const ruleset = new ses.ReceiptRuleSet(this, 'ReceiptRuleSet', {
       dropSpam: true,
       rules: [
         {
