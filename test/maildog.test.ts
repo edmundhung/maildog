@@ -27,16 +27,16 @@ test('Stack Snapshot', () => {
           "Description": "S3 key for asset version \\"0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719\\"",
           "Type": "String",
         },
-        "AssetParameters2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971ArtifactHash5E83842B": Object {
-          "Description": "Artifact hash for asset \\"2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971\\"",
+        "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65ArtifactHash6A90125E": Object {
+          "Description": "Artifact hash for asset \\"494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65\\"",
           "Type": "String",
         },
-        "AssetParameters2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971S3Bucket87DB638F": Object {
-          "Description": "S3 bucket for asset \\"2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971\\"",
+        "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3BucketCA91D5FE": Object {
+          "Description": "S3 bucket for asset \\"494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65\\"",
           "Type": "String",
         },
-        "AssetParameters2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971S3VersionKey47DED38F": Object {
-          "Description": "S3 key for asset version \\"2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971\\"",
+        "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3VersionKeyC9B93B70": Object {
+          "Description": "S3 key for asset version \\"494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65\\"",
           "Type": "String",
         },
       },
@@ -96,7 +96,7 @@ test('Stack Snapshot', () => {
                             "Arn",
                           ],
                         },
-                        "/*",
+                        "/emails/*",
                       ],
                     ],
                   },
@@ -174,7 +174,7 @@ test('Stack Snapshot', () => {
           "Properties": Object {
             "Code": Object {
               "S3Bucket": Object {
-                "Ref": "AssetParameters2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971S3Bucket87DB638F",
+                "Ref": "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3BucketCA91D5FE",
               },
               "S3Key": Object {
                 "Fn::Join": Array [
@@ -187,7 +187,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParameters2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971S3VersionKey47DED38F",
+                              "Ref": "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3VersionKeyC9B93B70",
                             },
                           ],
                         },
@@ -200,7 +200,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParameters2336e96bacb577bb3093e957ab369ae7867e1942dd4939836805bd93d4273971S3VersionKey47DED38F",
+                              "Ref": "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3VersionKeyC9B93B70",
                             },
                           ],
                         },
@@ -221,9 +221,6 @@ test('Stack Snapshot', () => {
             "Environment": Object {
               "Variables": Object {
                 "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
-                "EMAIL_BUCKET": Object {
-                  "Ref": "MailDogBucketA54A602D",
-                },
               },
             },
             "Handler": "index.handler",
@@ -399,6 +396,7 @@ test('Stack Snapshot', () => {
                     "BucketName": Object {
                       "Ref": "MailDogBucketA54A602D",
                     },
+                    "ObjectKeyPrefix": "emails/",
                     "TopicArn": Object {
                       "Ref": "MailDogMailFeed65FBE969",
                     },

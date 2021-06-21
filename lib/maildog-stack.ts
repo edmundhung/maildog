@@ -53,9 +53,6 @@ export class MailDogStack extends cdk.Stack {
           'process.env.CONFIG': JSON.stringify(props.config),
         },
       },
-      environment: {
-        EMAIL_BUCKET: bucket.bucketName,
-      },
       timeout: cdk.Duration.seconds(5),
       memorySize: 128,
       deadLetterQueue,
@@ -89,6 +86,7 @@ export class MailDogStack extends cdk.Stack {
           actions: [
             new sesActions.S3({
               bucket,
+              objectKeyPrefix: 'emails/',
               topic: mailFeed,
             }),
           ],
