@@ -8,10 +8,25 @@ import * as sns from '@aws-cdk/aws-sns';
 import * as snsSubscriptions from '@aws-cdk/aws-sns-subscriptions';
 import * as sqs from '@aws-cdk/aws-sqs';
 import * as path from 'path';
+import { DispatcherConfig } from './maildog-stack.dispatcher';
+
+interface MailDogForwardingRule {
+  description?: string;
+  to: string[];
+}
+
+interface MailDogDomainRule {
+  enabled?: boolean;
+  fromEmail?: string;
+  scanEnabled?: boolean;
+  tlsEnforced?: boolean;
+  allowPlusSign?: boolean;
+  fallbackEmails?: string[];
+  forwardingEmail?: Record<string, MailDogForwardingRule>;
+}
 
 interface MailDogConfig {
-  fromEmail?: string;
-  forwardMapping: Record<string, string[]>;
+  domains: Record<string, MailDogDomainRule>;
 }
 
 interface MailDogStackProps extends cdk.StackProps {
@@ -23,6 +38,7 @@ export class MailDogStack extends cdk.Stack {
     super(scope, id, props);
 
     // The code that defines your stack goes here
+    const { domains } = props.config;
     const bucket = new s3.Bucket(this, 'Bucket', {
       lifecycleRules: [
         {
@@ -50,7 +66,29 @@ export class MailDogStack extends cdk.Stack {
         minify: true,
         sourceMap: false,
         define: {
-          'process.env.CONFIG': JSON.stringify(props.config),
+          'process.env.CONFIG_PER_KEY_PREFIX': JSON.stringify(
+            Object.entries(domains).reduce((result, [domain, rule]) => {
+              result[`${domain}/`] = {
+                fromEmail: rule.fromEmail
+                  ? `${rule.fromEmail}@${domain}`
+                  : null,
+                allowPlusSign: rule.allowPlusSign,
+                forwardMapping: Object.entries(rule.forwardingEmail ?? {})
+                  .concat(
+                    rule.fallbackEmails
+                      ? [['', { to: rule.fallbackEmails }]]
+                      : [],
+                  )
+                  .reduce((mapping, [prefix, entry]) => {
+                    mapping[`${prefix}@${domain}`] = entry.to;
+
+                    return mapping;
+                  }, {} as Record<string, string[]>),
+              };
+
+              return result;
+            }, {} as Record<string, DispatcherConfig>),
+          ),
         },
       },
       timeout: cdk.Duration.seconds(5),
@@ -80,18 +118,36 @@ export class MailDogStack extends cdk.Stack {
     });
     const ruleset = new ses.ReceiptRuleSet(this, 'ReceiptRuleSet', {
       dropSpam: true,
-      rules: [
-        {
-          enabled: true,
+      rules: Object.entries(domains).flatMap(([domain, rule]) => {
+        const maxRecipientsPerRule = 100;
+        const recipientsPerRule = rule.fallbackEmails
+          ? [[domain]]
+          : Object.keys(rule.forwardingEmail ?? {})
+              .map((prefix) => `${prefix}@${domain}`)
+              .reduce((chunks, _, i, list) => {
+                if (i % maxRecipientsPerRule === 0) {
+                  chunks.push(list.slice(i, i + maxRecipientsPerRule));
+                }
+
+                return chunks;
+              }, [] as string[][]);
+
+        return recipientsPerRule.map<ses.ReceiptRuleOptions>((recipients) => ({
+          enabled: rule.enabled,
+          recipients: recipients,
+          scanEnabled: rule.scanEnabled,
+          tlsPolicy: rule.tlsEnforced
+            ? ses.TlsPolicy.REQUIRE
+            : ses.TlsPolicy.OPTIONAL,
           actions: [
             new sesActions.S3({
               bucket,
-              objectKeyPrefix: 'emails/',
+              objectKeyPrefix: `${domain}/`,
               topic: mailFeed,
             }),
           ],
-        },
-      ],
+        }));
+      }),
     });
 
     ruleset.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);

@@ -6,8 +6,26 @@ test('Stack Snapshot', () => {
   const app = new cdk.App();
   const stack = new MailDogStack(app, 'ExampleStack', {
     config: {
-      forwardMapping: {
-        '@example.com': ['noreply@example.com'],
+      domains: {
+        'example.com': {
+          fallbackEmails: ['example@gmail.com'],
+        },
+        'maildog.xyz': {
+          enabled: true,
+          fromEmail: 'noreply',
+          scanEnabled: true,
+          tlsEnforced: true,
+          allowPlusSign: true,
+          forwardingEmail: {
+            foo: {
+              to: ['example@gmail.com'],
+            },
+            bar: {
+              description: 'Optional description',
+              to: ['baz@mail.com', 'bar@example.com'],
+            },
+          },
+        },
       },
     },
   });
@@ -27,16 +45,16 @@ test('Stack Snapshot', () => {
           "Description": "S3 key for asset version \\"0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719\\"",
           "Type": "String",
         },
-        "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65ArtifactHash6A90125E": Object {
-          "Description": "Artifact hash for asset \\"494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65\\"",
+        "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3ArtifactHash570DFE15": Object {
+          "Description": "Artifact hash for asset \\"a5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3\\"",
           "Type": "String",
         },
-        "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3BucketCA91D5FE": Object {
-          "Description": "S3 bucket for asset \\"494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65\\"",
+        "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3BucketEF921EEC": Object {
+          "Description": "S3 bucket for asset \\"a5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3\\"",
           "Type": "String",
         },
-        "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3VersionKeyC9B93B70": Object {
-          "Description": "S3 key for asset version \\"494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65\\"",
+        "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3VersionKeyBC04F3D4": Object {
+          "Description": "S3 key for asset version \\"a5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3\\"",
           "Type": "String",
         },
       },
@@ -96,7 +114,35 @@ test('Stack Snapshot', () => {
                             "Arn",
                           ],
                         },
-                        "/emails/*",
+                        "/example.com/*",
+                      ],
+                    ],
+                  },
+                },
+                Object {
+                  "Action": "s3:PutObject",
+                  "Condition": Object {
+                    "StringEquals": Object {
+                      "aws:Referer": Object {
+                        "Ref": "AWS::AccountId",
+                      },
+                    },
+                  },
+                  "Effect": "Allow",
+                  "Principal": Object {
+                    "Service": "ses.amazonaws.com",
+                  },
+                  "Resource": Object {
+                    "Fn::Join": Array [
+                      "",
+                      Array [
+                        Object {
+                          "Fn::GetAtt": Array [
+                            "Bucket83908E77",
+                            "Arn",
+                          ],
+                        },
+                        "/maildog.xyz/*",
                       ],
                     ],
                   },
@@ -174,7 +220,7 @@ test('Stack Snapshot', () => {
           "Properties": Object {
             "Code": Object {
               "S3Bucket": Object {
-                "Ref": "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3BucketCA91D5FE",
+                "Ref": "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3BucketEF921EEC",
               },
               "S3Key": Object {
                 "Fn::Join": Array [
@@ -187,7 +233,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3VersionKeyC9B93B70",
+                              "Ref": "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3VersionKeyBC04F3D4",
                             },
                           ],
                         },
@@ -200,7 +246,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParameters494acd5c01f80cc8ffc56aa2d98c4ebc615edd4d16f323abe528f13fb9696e65S3VersionKeyC9B93B70",
+                              "Ref": "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3VersionKeyBC04F3D4",
                             },
                           ],
                         },
@@ -396,7 +442,7 @@ test('Stack Snapshot', () => {
                     "BucketName": Object {
                       "Ref": "Bucket83908E77",
                     },
-                    "ObjectKeyPrefix": "emails/",
+                    "ObjectKeyPrefix": "example.com/",
                     "TopicArn": Object {
                       "Ref": "MailFeedF42B1B20",
                     },
@@ -404,6 +450,46 @@ test('Stack Snapshot', () => {
                 },
               ],
               "Enabled": true,
+              "Recipients": Array [
+                "example.com",
+              ],
+              "TlsPolicy": "Optional",
+            },
+            "RuleSetName": Object {
+              "Ref": "ReceiptRuleSetD3CCC994",
+            },
+          },
+          "Type": "AWS::SES::ReceiptRule",
+        },
+        "ReceiptRuleSetRule1636DD081": Object {
+          "DependsOn": Array [
+            "BucketPolicyE9A3008A",
+          ],
+          "Properties": Object {
+            "After": Object {
+              "Ref": "ReceiptRuleSetRule01CA7709C",
+            },
+            "Rule": Object {
+              "Actions": Array [
+                Object {
+                  "S3Action": Object {
+                    "BucketName": Object {
+                      "Ref": "Bucket83908E77",
+                    },
+                    "ObjectKeyPrefix": "maildog.xyz/",
+                    "TopicArn": Object {
+                      "Ref": "MailFeedF42B1B20",
+                    },
+                  },
+                },
+              ],
+              "Enabled": true,
+              "Recipients": Array [
+                "foo@maildog.xyz",
+                "bar@maildog.xyz",
+              ],
+              "ScanEnabled": true,
+              "TlsPolicy": "Require",
             },
             "RuleSetName": Object {
               "Ref": "ReceiptRuleSetD3CCC994",

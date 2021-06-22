@@ -7,6 +7,12 @@ import {
 } from 'aws-lambda';
 import LambdaForwarder from 'aws-lambda-ses-forwarder';
 
+export interface DispatcherConfig {
+  fromEmail?: string | null;
+  allowPlusSign?: boolean;
+  forwardMapping: Record<string, string[]>;
+}
+
 function isSESMessage(message: any): message is SESMessage {
   return (
     typeof message.mail !== 'undefined' &&
@@ -75,10 +81,13 @@ export const handler: SNSHandler = (event, context, callback) => {
     '',
   );
   const emailBucket = message.receipt.action.bucketName;
-  const config = process.env.CONFIG ?? {};
+  const config = (process.env.CONFIG_PER_KEY_PREFIX ?? {}) as Record<
+    string,
+    DispatcherConfig
+  >;
   const overrides = {
     config: {
-      ...config,
+      ...config[emailKeyPrefix],
       emailKeyPrefix,
       emailBucket,
     },
