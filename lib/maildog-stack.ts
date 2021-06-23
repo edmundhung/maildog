@@ -1,4 +1,5 @@
 import * as cdk from '@aws-cdk/core';
+import * as cloudwatch from '@aws-cdk/aws-cloudwatch';
 import * as iam from '@aws-cdk/aws-iam';
 import * as lambda from '@aws-cdk/aws-lambda-nodejs';
 import * as s3 from '@aws-cdk/aws-s3';
@@ -9,7 +10,6 @@ import * as snsSubscriptions from '@aws-cdk/aws-sns-subscriptions';
 import * as sqs from '@aws-cdk/aws-sqs';
 import * as path from 'path';
 import { DispatcherConfig } from './maildog-stack.dispatcher';
-
 interface MailDogForwardingRule {
   description?: string;
   to: string[];
@@ -59,6 +59,14 @@ export class MailDogStack extends cdk.Stack {
     const mailFeed = new sns.Topic(this, 'MailFeed');
     const deadLetterQueue = new sqs.Queue(this, 'DeadLetterQueue', {
       retentionPeriod: cdk.Duration.days(14),
+    });
+    const alarm = new cloudwatch.Alarm(this, 'MailAlarm', {
+      metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible({
+        statistic: 'Average',
+        period: cdk.Duration.minutes(5),
+      }),
+      threshold: 1,
+      evaluationPeriods: 1,
     });
     const dispatcher = new lambda.NodejsFunction(this, 'Dispatcher', {
       entry: path.resolve(__dirname, './maildog-stack.dispatcher.ts'),
@@ -150,6 +158,7 @@ export class MailDogStack extends cdk.Stack {
       }),
     });
 
+    alarm.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
     ruleset.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
     mailFeed.addSubscription(
       new snsSubscriptions.LambdaSubscription(dispatcher, {
