@@ -397,6 +397,31 @@ test('Stack Snapshot', () => {
           },
           "Type": "AWS::IAM::Policy",
         },
+        "MailAlarmC718F8ED": Object {
+          "DeletionPolicy": "Delete",
+          "Properties": Object {
+            "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+            "Dimensions": Array [
+              Object {
+                "Name": "QueueName",
+                "Value": Object {
+                  "Fn::GetAtt": Array [
+                    "DeadLetterQueue9F481546",
+                    "QueueName",
+                  ],
+                },
+              },
+            ],
+            "EvaluationPeriods": 1,
+            "MetricName": "ApproximateNumberOfMessagesVisible",
+            "Namespace": "AWS/SQS",
+            "Period": 300,
+            "Statistic": "Average",
+            "Threshold": 1,
+          },
+          "Type": "AWS::CloudWatch::Alarm",
+          "UpdateReplacePolicy": "Delete",
+        },
         "MailFeedF42B1B20": Object {
           "Type": "AWS::SNS::Topic",
         },

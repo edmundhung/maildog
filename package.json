@@ -53,6 +53,7 @@
     "*.{ts,js,json,md}": "prettier --write"
   },
   "dependencies": {
+    "@aws-cdk/aws-cloudwatch": "^1.108.1",
     "@aws-cdk/aws-iam": "^1.108.1",
     "@aws-cdk/aws-lambda-nodejs": "^1.108.1",
     "@aws-cdk/aws-s3": "^1.108.1",
