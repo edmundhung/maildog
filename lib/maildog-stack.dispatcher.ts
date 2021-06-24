@@ -9,7 +9,6 @@ import LambdaForwarder from 'aws-lambda-ses-forwarder';
 
 export interface DispatcherConfig {
   fromEmail?: string | null;
-  allowPlusSign?: boolean;
   forwardMapping: Record<string, string[]>;
 }
 
@@ -88,6 +87,7 @@ export const handler: SNSHandler = (event, context, callback) => {
   const overrides = {
     config: {
       ...config[emailKeyPrefix],
+      allowPlusSign: true,
       emailKeyPrefix,
       emailBucket,
     },
