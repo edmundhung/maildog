@@ -20,7 +20,6 @@ interface MailDogDomainRule {
   fromEmail?: string;
   scanEnabled?: boolean;
   tlsEnforced?: boolean;
-  allowPlusSign?: boolean;
   fallbackEmails?: string[];
   forwardingEmail?: Record<string, MailDogForwardingRule>;
 }
@@ -81,7 +80,6 @@ export class MailDogStack extends cdk.Stack {
                 fromEmail: rule.fromEmail
                   ? `${rule.fromEmail}@${domain}`
                   : null,
-                allowPlusSign: rule.allowPlusSign,
                 forwardMapping: Object.entries(rule.forwardingEmail ?? {})
                   .concat(
                     rule.fallbackEmails

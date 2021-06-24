@@ -15,7 +15,6 @@ test('Stack Snapshot', () => {
           fromEmail: 'noreply',
           scanEnabled: true,
           tlsEnforced: true,
-          allowPlusSign: true,
           forwardingEmail: {
             foo: {
               to: ['example@gmail.com'],
@@ -45,16 +44,16 @@ test('Stack Snapshot', () => {
           "Description": "S3 key for asset version \\"0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719\\"",
           "Type": "String",
         },
-        "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3ArtifactHash570DFE15": Object {
-          "Description": "Artifact hash for asset \\"a5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3\\"",
+        "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01ArtifactHashCB808D06": Object {
+          "Description": "Artifact hash for asset \\"3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01\\"",
           "Type": "String",
         },
-        "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3BucketEF921EEC": Object {
-          "Description": "S3 bucket for asset \\"a5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3\\"",
+        "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3Bucket3702998F": Object {
+          "Description": "S3 bucket for asset \\"3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01\\"",
           "Type": "String",
         },
-        "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3VersionKeyBC04F3D4": Object {
-          "Description": "S3 key for asset version \\"a5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3\\"",
+        "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3VersionKeyB621FC29": Object {
+          "Description": "S3 key for asset version \\"3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01\\"",
           "Type": "String",
         },
       },
@@ -220,7 +219,7 @@ test('Stack Snapshot', () => {
           "Properties": Object {
             "Code": Object {
               "S3Bucket": Object {
-                "Ref": "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3BucketEF921EEC",
+                "Ref": "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3Bucket3702998F",
               },
               "S3Key": Object {
                 "Fn::Join": Array [
@@ -233,7 +232,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3VersionKeyBC04F3D4",
+                              "Ref": "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3VersionKeyB621FC29",
                             },
                           ],
                         },
@@ -246,7 +245,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParametersa5802dea03a14bcd731b043e09f846485f33f6eb85d44cefee24fb40caf0f1b3S3VersionKeyBC04F3D4",
+                              "Ref": "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3VersionKeyB621FC29",
                             },
                           ],
                         },
