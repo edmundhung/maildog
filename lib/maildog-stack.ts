@@ -129,33 +129,49 @@ export class MailDogStack extends cdk.Stack {
       dropSpam: true,
       rules: Object.entries(domains).flatMap(([domain, rule]) => {
         const maxRecipientsPerRule = 100;
-        const recipientsPerRule = rule.fallbackEmails
-          ? [[domain]]
-          : Object.keys(rule.forwardingEmail ?? {})
-              .map((prefix) => `${prefix}@${domain}`)
-              .reduce((chunks, _, i, list) => {
-                if (i % maxRecipientsPerRule === 0) {
-                  chunks.push(list.slice(i, i + maxRecipientsPerRule));
-                }
+        const recipients = rule.fallbackEmails
+          ? [domain]
+          : Object.keys(rule.forwardingEmail ?? {}).map(
+              (prefix) => `${prefix}@${domain}`,
+            );
+        const rules = recipients
+          .reduce((chunks, _, i, list) => {
+            if (i % maxRecipientsPerRule === 0) {
+              chunks.push(list.slice(i, i + maxRecipientsPerRule));
+            }
 
-                return chunks;
-              }, [] as string[][]);
+            return chunks;
+          }, [] as string[][])
+          .map<ses.ReceiptRuleOptions>((recipients) => ({
+            enabled: rule.enabled,
+            recipients: recipients,
+            scanEnabled: rule.scanEnabled,
+            tlsPolicy: rule.tlsEnforced
+              ? ses.TlsPolicy.REQUIRE
+              : ses.TlsPolicy.OPTIONAL,
+            actions: [
+              new sesActions.S3({
+                bucket,
+                objectKeyPrefix: `${domain}/`,
+                topic: mailFeed,
+              }),
+            ],
+          }));
 
-        return recipientsPerRule.map<ses.ReceiptRuleOptions>((recipients) => ({
-          enabled: rule.enabled,
-          recipients: recipients,
-          scanEnabled: rule.scanEnabled,
-          tlsPolicy: rule.tlsEnforced
-            ? ses.TlsPolicy.REQUIRE
-            : ses.TlsPolicy.OPTIONAL,
-          actions: [
-            new sesActions.S3({
-              bucket,
-              objectKeyPrefix: `${domain}/`,
-              topic: mailFeed,
-            }),
-          ],
-        }));
+        if (!recipients.includes(domain)) {
+          rules.push({
+            enabled: rule.enabled,
+            recipients: [domain],
+            actions: [
+              new sesActions.Bounce({
+                template: sesActions.BounceTemplate.MAILBOX_DOES_NOT_EXIST,
+                sender: `${rule.fromEmail ?? 'noreply'}@${domain}`,
+              }),
+            ],
+          });
+        }
+
+        return rules;
       }),
     });
 

@@ -523,6 +523,33 @@ test('Stack Snapshot', () => {
           },
           "Type": "AWS::SES::ReceiptRule",
         },
+        "ReceiptRuleSetRule22D448221": Object {
+          "Properties": Object {
+            "After": Object {
+              "Ref": "ReceiptRuleSetRule1636DD081",
+            },
+            "Rule": Object {
+              "Actions": Array [
+                Object {
+                  "BounceAction": Object {
+                    "Message": "Mailbox does not exist",
+                    "Sender": "noreply@maildog.xyz",
+                    "SmtpReplyCode": "550",
+                    "StatusCode": "5.1.1",
+                  },
+                },
+              ],
+              "Enabled": true,
+              "Recipients": Array [
+                "maildog.xyz",
+              ],
+            },
+            "RuleSetName": Object {
+              "Ref": "ReceiptRuleSetD3CCC994",
+            },
+          },
+          "Type": "AWS::SES::ReceiptRule",
+        },
         "SingletonLambda224e77f9a32e4b4dac32983477abba164533EA15": Object {
           "DependsOn": Array [
             "SingletonLambda224e77f9a32e4b4dac32983477abba16ServiceRole3037F5B4",
