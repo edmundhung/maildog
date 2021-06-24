@@ -418,6 +418,7 @@ test('Stack Snapshot', () => {
             "Period": 300,
             "Statistic": "Average",
             "Threshold": 1,
+            "TreatMissingData": "notBreaching",
           },
           "Type": "AWS::CloudWatch::Alarm",
           "UpdateReplacePolicy": "Delete",
