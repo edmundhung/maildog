@@ -67,6 +67,7 @@ export class MailDogStack extends cdk.Stack {
       }),
       threshold: 1,
       evaluationPeriods: 1,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
     });
     const dispatcher = new lambda.NodejsFunction(this, 'Dispatcher', {
       entry: path.resolve(__dirname, './maildog-stack.dispatcher.ts'),
