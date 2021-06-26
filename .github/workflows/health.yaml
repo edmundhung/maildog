@@ -1,0 +1,20 @@
+name: Health
+on:
+  schedule:
+    # Every hour
+    - cron: '0 * * * *'
+
+jobs:
+  alarm:
+    name: Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Check if alarm state is OK
+        run: aws cloudwatch describe-alarms --alarm-name-prefix MailDog-MailAlarm --state-value OK --output yaml | grep OK
