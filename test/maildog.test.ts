@@ -683,8 +683,8 @@ test('Stack Snapshot', () => {
                 },
                 Object {
                   "Action": Array [
-                    "sqs:receiveMessage",
-                    "sqs:deleteMessageBatch",
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
                   ],
                   "Effect": "Allow",
                   "Resource": Object {
@@ -695,7 +695,7 @@ test('Stack Snapshot', () => {
                   },
                 },
                 Object {
-                  "Action": "sns:publish",
+                  "Action": "sns:Publish",
                   "Effect": "Allow",
                   "Resource": Object {
                     "Ref": "MailFeedF42B1B20",

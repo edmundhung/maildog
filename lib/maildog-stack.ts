@@ -199,12 +199,12 @@ export class MailDogStack extends cdk.Stack {
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           resources: [deadLetterQueue.queueArn],
-          actions: ['sqs:receiveMessage', 'sqs:deleteMessageBatch'],
+          actions: ['sqs:ReceiveMessage', 'sqs:DeleteMessage'],
         }),
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           resources: [mailFeed.topicArn],
-          actions: ['sns:publish'],
+          actions: ['sns:Publish'],
         }),
       ],
     });
