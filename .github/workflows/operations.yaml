@@ -1,0 +1,18 @@
+name: Operations
+on:
+  workflow_dispatch:
+
+jobs:
+  redrive:
+    name: Redrive DLQ Messages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Invoke Scheduler
+        run: aws lambda invoke --function-name $(aws lambda list-functions --query 'Functions[?starts_with(FunctionName, `MailDog-Scheduler`) == `true`].FunctionName' --output text) --output yaml response.yaml
