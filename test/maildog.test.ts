@@ -56,6 +56,18 @@ test('Stack Snapshot', () => {
           "Description": "S3 key for asset version \\"3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01\\"",
           "Type": "String",
         },
+        "AssetParameters40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86fArtifactHashF0B40986": Object {
+          "Description": "Artifact hash for asset \\"40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86f\\"",
+          "Type": "String",
+        },
+        "AssetParameters40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86fS3BucketB8D31A7B": Object {
+          "Description": "S3 bucket for asset \\"40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86f\\"",
+          "Type": "String",
+        },
+        "AssetParameters40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86fS3VersionKey7E5F5AC3": Object {
+          "Description": "S3 key for asset version \\"40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86f\\"",
+          "Type": "String",
+        },
       },
       "Resources": Object {
         "Bucket83908E77": Object {
@@ -548,6 +560,168 @@ test('Stack Snapshot', () => {
             },
           },
           "Type": "AWS::SES::ReceiptRule",
+        },
+        "SchedulerCFE73206": Object {
+          "DependsOn": Array [
+            "SchedulerServiceRoleDefaultPolicyFA0D8235",
+            "SchedulerServiceRole62CDA70C",
+          ],
+          "Properties": Object {
+            "Code": Object {
+              "S3Bucket": Object {
+                "Ref": "AssetParameters40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86fS3BucketB8D31A7B",
+              },
+              "S3Key": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    Object {
+                      "Fn::Select": Array [
+                        0,
+                        Object {
+                          "Fn::Split": Array [
+                            "||",
+                            Object {
+                              "Ref": "AssetParameters40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86fS3VersionKey7E5F5AC3",
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    Object {
+                      "Fn::Select": Array [
+                        1,
+                        Object {
+                          "Fn::Split": Array [
+                            "||",
+                            Object {
+                              "Ref": "AssetParameters40880c7969e68b44e0c4f0705d830dd8d4158cc7735a6d1affbe71abc750f86fS3VersionKey7E5F5AC3",
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                ],
+              },
+            },
+            "DeadLetterConfig": Object {
+              "TargetArn": Object {
+                "Fn::GetAtt": Array [
+                  "DeadLetterQueue9F481546",
+                  "Arn",
+                ],
+              },
+            },
+            "Environment": Object {
+              "Variables": Object {
+                "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+                "SNS_TOPIC_ARN": Object {
+                  "Ref": "MailFeedF42B1B20",
+                },
+                "SQS_QUEUE_URL": Object {
+                  "Ref": "DeadLetterQueue9F481546",
+                },
+              },
+            },
+            "Handler": "index.handler",
+            "MemorySize": 128,
+            "Role": Object {
+              "Fn::GetAtt": Array [
+                "SchedulerServiceRole62CDA70C",
+                "Arn",
+              ],
+            },
+            "Runtime": "nodejs14.x",
+            "Timeout": 5,
+          },
+          "Type": "AWS::Lambda::Function",
+        },
+        "SchedulerServiceRole62CDA70C": Object {
+          "Properties": Object {
+            "AssumeRolePolicyDocument": Object {
+              "Statement": Array [
+                Object {
+                  "Action": "sts:AssumeRole",
+                  "Effect": "Allow",
+                  "Principal": Object {
+                    "Service": "lambda.amazonaws.com",
+                  },
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "ManagedPolicyArns": Array [
+              Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:",
+                    Object {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+                  ],
+                ],
+              },
+            ],
+          },
+          "Type": "AWS::IAM::Role",
+        },
+        "SchedulerServiceRoleDefaultPolicyFA0D8235": Object {
+          "Properties": Object {
+            "PolicyDocument": Object {
+              "Statement": Array [
+                Object {
+                  "Action": Array [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:logs:*:*:*",
+                },
+                Object {
+                  "Action": Array [
+                    "sqs:receiveMessage",
+                    "sqs:deleteMessageBatch",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": Object {
+                    "Fn::GetAtt": Array [
+                      "DeadLetterQueue9F481546",
+                      "Arn",
+                    ],
+                  },
+                },
+                Object {
+                  "Action": "sns:publish",
+                  "Effect": "Allow",
+                  "Resource": Object {
+                    "Ref": "MailFeedF42B1B20",
+                  },
+                },
+                Object {
+                  "Action": "sqs:SendMessage",
+                  "Effect": "Allow",
+                  "Resource": Object {
+                    "Fn::GetAtt": Array [
+                      "DeadLetterQueue9F481546",
+                      "Arn",
+                    ],
+                  },
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "SchedulerServiceRoleDefaultPolicyFA0D8235",
+            "Roles": Array [
+              Object {
+                "Ref": "SchedulerServiceRole62CDA70C",
+              },
+            ],
+          },
+          "Type": "AWS::IAM::Policy",
         },
         "SingletonLambda224e77f9a32e4b4dac32983477abba164533EA15": Object {
           "DependsOn": Array [

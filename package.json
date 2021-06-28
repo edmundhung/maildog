@@ -64,6 +64,7 @@
     "@aws-cdk/core": "^1.108.1",
     "aws-cdk": "^1.108.1",
     "aws-lambda-ses-forwarder": "^5.0.0",
+    "aws-sdk": "^2.935.0",
     "esbuild": "^0.12.8",
     "source-map-support": "^0.5.19",
     "ts-node": "^10.0.0",
