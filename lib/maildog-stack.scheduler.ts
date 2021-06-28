@@ -103,6 +103,12 @@ async function getMessages(sqs: SQS): Promise<SQS.Message[]> {
     }
   } while (true);
 
+  console.log({
+    level: 'info',
+    message: `Messages received: ${messages.length}`,
+    details: JSON.stringify(messages),
+  });
+
   return messages;
 }
 
@@ -111,7 +117,7 @@ async function publishMessages(
   messages: SQS.Message[],
 ): Promise<[SQS.Message[], SQS.Message[]]> {
   const successful: SQS.Message[] = [];
-  const unsuccessful: SQS.Message[] = [];
+  const failed: SQS.Message[] = [];
   const result = await Promise.allSettled(
     messages.map(async (m) => {
       if (!m.ReceiptHandle) {
@@ -151,7 +157,7 @@ async function publishMessages(
           successful.push(messages[i]);
           break;
         case 'rejected':
-          unsuccessful.push(messages[i]);
+          failed.push(messages[i]);
           break;
       }
     }
@@ -166,7 +172,14 @@ async function publishMessages(
     throw e;
   }
 
-  return [successful, unsuccessful];
+  console.log({
+    level: 'info',
+    message: `Messages published - Successful: ${successful.length}, Failed: ${failed.length}`,
+    successful: JSON.stringify(successful),
+    failed: JSON.stringify(failed),
+  });
+
+  return [successful, failed];
 }
 
 async function deleteMessages(
@@ -192,19 +205,26 @@ async function deleteMessages(
 
     throw new Error('Delete messages failed');
   }
+
+  console.log({
+    level: 'info',
+    message: `Messages deleted - Successful: ${result.Successful.length}, Failed: ${result.Failed.length}`,
+    successful: JSON.stringify(result.Successful),
+    failed: JSON.stringify(result.Failed),
+  });
 }
 
 export const handler: SQSHandler = async () => {
   const sqs = new SQS();
   const sns = new SNS();
   const messages = await getMessages(sqs);
-  const [successful, unsuccessful] = await publishMessages(sns, messages);
+  const [successful, failed] = await publishMessages(sns, messages);
 
-  if (unsuccessful.length > 0) {
-    if (successful.length > 0) {
-      await deleteMessages(sqs, successful);
-    }
+  if (successful.length > 0) {
+    await deleteMessages(sqs, successful);
+  }
 
+  if (failed.length > 0) {
     throw new Error(
       'Publishing messages from DLQ fails; Please refer to logs for details',
     );
