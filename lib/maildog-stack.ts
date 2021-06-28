@@ -173,6 +173,42 @@ export class MailDogStack extends cdk.Stack {
       }),
     });
 
+    new lambda.NodejsFunction(this, 'Scheduler', {
+      entry: path.resolve(__dirname, './maildog-stack.scheduler.ts'),
+      bundling: {
+        minify: true,
+        sourceMap: false,
+      },
+      environment: {
+        SQS_QUEUE_URL: deadLetterQueue.queueUrl,
+        SNS_TOPIC_ARN: mailFeed.topicArn,
+      },
+      timeout: cdk.Duration.seconds(5),
+      memorySize: 128,
+      deadLetterQueue,
+      initialPolicy: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: ['arn:aws:logs:*:*:*'],
+          actions: [
+            'logs:CreateLogGroup',
+            'logs:CreateLogStream',
+            'logs:PutLogEvents',
+          ],
+        }),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: [deadLetterQueue.queueArn],
+          actions: ['sqs:receiveMessage', 'sqs:deleteMessageBatch'],
+        }),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: [mailFeed.topicArn],
+          actions: ['sns:publish'],
+        }),
+      ],
+    });
+
     alarm.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
     ruleset.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
     mailFeed.addSubscription(
