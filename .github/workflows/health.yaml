@@ -1,4 +1,4 @@
-name: Health
+name: Health Check
 on:
   schedule:
     # Every hour
@@ -6,7 +6,7 @@ on:
 
 jobs:
   alarm:
-    name: Health Check
+    name: Check Alarm
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
