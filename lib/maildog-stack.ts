@@ -100,6 +100,7 @@ export class MailDogStack extends cdk.Stack {
       },
       timeout: cdk.Duration.seconds(5),
       memorySize: 128,
+      retryAttempts: 0,
       deadLetterQueue,
       initialPolicy: [
         new iam.PolicyStatement({
@@ -185,6 +186,7 @@ export class MailDogStack extends cdk.Stack {
       },
       timeout: cdk.Duration.seconds(5),
       memorySize: 128,
+      retryAttempts: 0,
       deadLetterQueue,
       initialPolicy: [
         new iam.PolicyStatement({
