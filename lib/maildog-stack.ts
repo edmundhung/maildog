@@ -154,6 +154,7 @@ export class MailDogStack extends cdk.Stack {
                 objectKeyPrefix: `${domain}/`,
                 topic: mailFeed,
               }),
+              new sesActions.Stop(),
             ],
           }));
 
