@@ -293,6 +293,16 @@ test('Stack Snapshot', () => {
           },
           "Type": "AWS::Lambda::Function",
         },
+        "DispatcherEventInvokeConfigE9191C1C": Object {
+          "Properties": Object {
+            "FunctionName": Object {
+              "Ref": "DispatcherD4A12972",
+            },
+            "MaximumRetryAttempts": 0,
+            "Qualifier": "$LATEST",
+          },
+          "Type": "AWS::Lambda::EventInvokeConfig",
+        },
         "DispatcherMailFeed5E0BDAD7": Object {
           "Properties": Object {
             "Endpoint": Object {
@@ -636,6 +646,16 @@ test('Stack Snapshot', () => {
             "Timeout": 5,
           },
           "Type": "AWS::Lambda::Function",
+        },
+        "SchedulerEventInvokeConfigBC5670B2": Object {
+          "Properties": Object {
+            "FunctionName": Object {
+              "Ref": "SchedulerCFE73206",
+            },
+            "MaximumRetryAttempts": 0,
+            "Qualifier": "$LATEST",
+          },
+          "Type": "AWS::Lambda::EventInvokeConfig",
         },
         "SchedulerServiceRole62CDA70C": Object {
           "Properties": Object {
