@@ -16,7 +16,7 @@ All I want is simply a service forwarding emails to one single place.
 I have been happily using [mailgun](https://www.mailgun.com) for years.
 As they changed pricing last year, I started looking for a replacement but options are relatively limited.
 
-After all, I open-sourced maildog and is looking for a community that shares the same needs as me.
+After all, I open-sourced `maildog` and is looking for a community that shares the same needs as me.
 The project aims to offer an extensible email forwarding solution with minimal maintenance and operational cost.
 
 ## ☁️ How it works?
@@ -25,7 +25,7 @@ The project aims to offer an extensible email forwarding solution with minimal m
 
 ## 💸 Pricing
 
-Yes. While it is **FREE** to use maildog, you are still required to pay AWS for the infrastructure setup on the cloud.
+Yes. While it is **FREE** to use `maildog`, you are still required to pay AWS for the infrastructure setup on the cloud.
 To give you a better idea, here is an **estimated** price breakdown based on the following assumption:
 
 - 10k emails / month or 333 emails / day
@@ -44,3 +44,31 @@ To give you a better idea, here is an **estimated** price breakdown based on the
 |             |                     |                                                                                                                                                                      | **2.434** | USD      |
 
 > As of 30 June 2021, estimated using [AWS Pricing Calculator](https://calculator.aws/#/estimate?id=f5b7c2a46317a99bfb149569d601e7e285504b4c)
+
+## 🚨 Limitations
+
+### Amazon SES sandbox
+
+SES restricts new users by placing them in the sandbox.
+Depends on your usage, if you would like to forward emails to [non-verified addresses](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses.html)
+or with higher volume, you might want to [move out of the sandbox](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html)
+
+### Maximum numbers of domains/alias allowed
+
+`maildog` configures SES using a receipt ruleset with some [hard limits](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/quotas.html).
+Depends on your configuration, if the domain is set with fallback emails, there is no **limit** on the alias. But if you prefer enabling defined alias only, then
+it is limited and varies based on the number of domains set and its configuration.
+
+> If only 1 domain with no fallback emails is configured, you can set up to 19,900 alias.
+
+> If 10 domains with no fallback emails are configured, you should be able to set up to 19,000 alias in total and the number is shared between all 10 domains.
+
+### Regions support
+
+Not every region support receiving emails with AWS SES. As of 30 June 2021, only 3 regions you can deploy `maildog` on:
+
+1. US East (N. Virginia)
+2. US West (Oregon)
+3. Europe (Ireland)
+
+Please check the [AWS documentation](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/regions.html#region-receive-email) for the latest update.
