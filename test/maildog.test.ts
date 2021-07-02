@@ -495,6 +495,11 @@ test('Stack Snapshot', () => {
                     },
                   },
                 },
+                Object {
+                  "StopAction": Object {
+                    "Scope": "RuleSet",
+                  },
+                },
               ],
               "Enabled": true,
               "Recipients": Array [
@@ -527,6 +532,11 @@ test('Stack Snapshot', () => {
                     "TopicArn": Object {
                       "Ref": "MailFeedF42B1B20",
                     },
+                  },
+                },
+                Object {
+                  "StopAction": Object {
+                    "Scope": "RuleSet",
                   },
                 },
               ],
