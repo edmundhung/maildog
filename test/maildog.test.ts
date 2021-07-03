@@ -32,18 +32,6 @@ test('Stack Snapshot', () => {
   expect(SynthUtils.toCloudFormation(stack)).toMatchInlineSnapshot(`
     Object {
       "Parameters": Object {
-        "AssetParameters0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719ArtifactHashC1AE5293": Object {
-          "Description": "Artifact hash for asset \\"0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719\\"",
-          "Type": "String",
-        },
-        "AssetParameters0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719S3BucketF34BDC85": Object {
-          "Description": "S3 bucket for asset \\"0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719\\"",
-          "Type": "String",
-        },
-        "AssetParameters0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719S3VersionKey98806A7D": Object {
-          "Description": "S3 key for asset version \\"0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719\\"",
-          "Type": "String",
-        },
         "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01ArtifactHashCB808D06": Object {
           "Description": "Artifact hash for asset \\"3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01\\"",
           "Type": "String",
@@ -66,6 +54,18 @@ test('Stack Snapshot', () => {
         },
         "AssetParametersca8674af2868d9931918a5aee74ec64978ec3f5baba1b392bdfb306204b15f59S3VersionKey01F69698": Object {
           "Description": "S3 key for asset version \\"ca8674af2868d9931918a5aee74ec64978ec3f5baba1b392bdfb306204b15f59\\"",
+          "Type": "String",
+        },
+        "AssetParametersf43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406ArtifactHash4823FBF7": Object {
+          "Description": "Artifact hash for asset \\"f43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406\\"",
+          "Type": "String",
+        },
+        "AssetParametersf43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406S3Bucket3EF97734": Object {
+          "Description": "S3 bucket for asset \\"f43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406\\"",
+          "Type": "String",
+        },
+        "AssetParametersf43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406S3VersionKeyADCC52F6": Object {
+          "Description": "S3 key for asset version \\"f43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406\\"",
           "Type": "String",
         },
       },
@@ -452,7 +452,11 @@ test('Stack Snapshot', () => {
           "Type": "AWS::SES::ReceiptRuleSet",
           "UpdateReplacePolicy": "Delete",
         },
-        "ReceiptRuleSetDropSpamRule1C768923": Object {
+        "ReceiptRuleSetRule01CA7709C": Object {
+          "DependsOn": Array [
+            "BucketPolicyE9A3008A",
+            "SpamFilterAllowSes2CDBB160",
+          ],
           "Properties": Object {
             "Rule": Object {
               "Actions": Array [
@@ -460,30 +464,13 @@ test('Stack Snapshot', () => {
                   "LambdaAction": Object {
                     "FunctionArn": Object {
                       "Fn::GetAtt": Array [
-                        "SingletonLambda224e77f9a32e4b4dac32983477abba164533EA15",
+                        "SpamFilter4A4DC48B",
                         "Arn",
                       ],
                     },
                     "InvocationType": "RequestResponse",
                   },
                 },
-              ],
-              "Enabled": true,
-              "ScanEnabled": true,
-            },
-            "RuleSetName": Object {
-              "Ref": "ReceiptRuleSetD3CCC994",
-            },
-          },
-          "Type": "AWS::SES::ReceiptRule",
-        },
-        "ReceiptRuleSetRule01CA7709C": Object {
-          "DependsOn": Array [
-            "BucketPolicyE9A3008A",
-          ],
-          "Properties": Object {
-            "Rule": Object {
-              "Actions": Array [
                 Object {
                   "S3Action": Object {
                     "BucketName": Object {
@@ -493,11 +480,6 @@ test('Stack Snapshot', () => {
                     "TopicArn": Object {
                       "Ref": "MailFeedF42B1B20",
                     },
-                  },
-                },
-                Object {
-                  "StopAction": Object {
-                    "Scope": "RuleSet",
                   },
                 },
               ],
@@ -516,6 +498,7 @@ test('Stack Snapshot', () => {
         "ReceiptRuleSetRule1636DD081": Object {
           "DependsOn": Array [
             "BucketPolicyE9A3008A",
+            "SpamFilterAllowSes2CDBB160",
           ],
           "Properties": Object {
             "After": Object {
@@ -523,6 +506,17 @@ test('Stack Snapshot', () => {
             },
             "Rule": Object {
               "Actions": Array [
+                Object {
+                  "LambdaAction": Object {
+                    "FunctionArn": Object {
+                      "Fn::GetAtt": Array [
+                        "SpamFilter4A4DC48B",
+                        "Arn",
+                      ],
+                    },
+                    "InvocationType": "RequestResponse",
+                  },
+                },
                 Object {
                   "S3Action": Object {
                     "BucketName": Object {
@@ -534,11 +528,6 @@ test('Stack Snapshot', () => {
                     },
                   },
                 },
-                Object {
-                  "StopAction": Object {
-                    "Scope": "RuleSet",
-                  },
-                },
               ],
               "Enabled": true,
               "Recipients": Array [
@@ -547,33 +536,6 @@ test('Stack Snapshot', () => {
               ],
               "ScanEnabled": true,
               "TlsPolicy": "Require",
-            },
-            "RuleSetName": Object {
-              "Ref": "ReceiptRuleSetD3CCC994",
-            },
-          },
-          "Type": "AWS::SES::ReceiptRule",
-        },
-        "ReceiptRuleSetRule22D448221": Object {
-          "Properties": Object {
-            "After": Object {
-              "Ref": "ReceiptRuleSetRule1636DD081",
-            },
-            "Rule": Object {
-              "Actions": Array [
-                Object {
-                  "BounceAction": Object {
-                    "Message": "Mailbox does not exist",
-                    "Sender": "noreply@maildog.xyz",
-                    "SmtpReplyCode": "550",
-                    "StatusCode": "5.1.1",
-                  },
-                },
-              ],
-              "Enabled": true,
-              "Recipients": Array [
-                "maildog.xyz",
-              ],
             },
             "RuleSetName": Object {
               "Ref": "ReceiptRuleSetD3CCC994",
@@ -753,14 +715,15 @@ test('Stack Snapshot', () => {
           },
           "Type": "AWS::IAM::Policy",
         },
-        "SingletonLambda224e77f9a32e4b4dac32983477abba164533EA15": Object {
+        "SpamFilter4A4DC48B": Object {
           "DependsOn": Array [
-            "SingletonLambda224e77f9a32e4b4dac32983477abba16ServiceRole3037F5B4",
+            "SpamFilterServiceRoleDefaultPolicy85EC4A04",
+            "SpamFilterServiceRole799061EA",
           ],
           "Properties": Object {
             "Code": Object {
               "S3Bucket": Object {
-                "Ref": "AssetParameters0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719S3BucketF34BDC85",
+                "Ref": "AssetParametersf43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406S3Bucket3EF97734",
               },
               "S3Key": Object {
                 "Fn::Join": Array [
@@ -773,7 +736,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParameters0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719S3VersionKey98806A7D",
+                              "Ref": "AssetParametersf43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406S3VersionKeyADCC52F6",
                             },
                           ],
                         },
@@ -786,7 +749,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParameters0d42b6f88af3322322d1fe8400651c02fd47dfc61f7919ac05a61b201c715719S3VersionKey98806A7D",
+                              "Ref": "AssetParametersf43ff010f656880b070bbc161ff1f52c0c9dc514b60991c97d31eba8466c4406S3VersionKeyADCC52F6",
                             },
                           ],
                         },
@@ -796,23 +759,30 @@ test('Stack Snapshot', () => {
                 ],
               },
             },
+            "Environment": Object {
+              "Variables": Object {
+                "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+              },
+            },
             "Handler": "index.handler",
+            "MemorySize": 128,
             "Role": Object {
               "Fn::GetAtt": Array [
-                "SingletonLambda224e77f9a32e4b4dac32983477abba16ServiceRole3037F5B4",
+                "SpamFilterServiceRole799061EA",
                 "Arn",
               ],
             },
             "Runtime": "nodejs14.x",
+            "Timeout": 3,
           },
           "Type": "AWS::Lambda::Function",
         },
-        "SingletonLambda224e77f9a32e4b4dac32983477abba16AllowSesB42DF904": Object {
+        "SpamFilterAllowSes2CDBB160": Object {
           "Properties": Object {
             "Action": "lambda:InvokeFunction",
             "FunctionName": Object {
               "Fn::GetAtt": Array [
-                "SingletonLambda224e77f9a32e4b4dac32983477abba164533EA15",
+                "SpamFilter4A4DC48B",
                 "Arn",
               ],
             },
@@ -823,7 +793,17 @@ test('Stack Snapshot', () => {
           },
           "Type": "AWS::Lambda::Permission",
         },
-        "SingletonLambda224e77f9a32e4b4dac32983477abba16ServiceRole3037F5B4": Object {
+        "SpamFilterEventInvokeConfig752E3DBC": Object {
+          "Properties": Object {
+            "FunctionName": Object {
+              "Ref": "SpamFilter4A4DC48B",
+            },
+            "MaximumRetryAttempts": 0,
+            "Qualifier": "$LATEST",
+          },
+          "Type": "AWS::Lambda::EventInvokeConfig",
+        },
+        "SpamFilterServiceRole799061EA": Object {
           "Properties": Object {
             "AssumeRolePolicyDocument": Object {
               "Statement": Array [
@@ -853,6 +833,31 @@ test('Stack Snapshot', () => {
             ],
           },
           "Type": "AWS::IAM::Role",
+        },
+        "SpamFilterServiceRoleDefaultPolicy85EC4A04": Object {
+          "Properties": Object {
+            "PolicyDocument": Object {
+              "Statement": Array [
+                Object {
+                  "Action": Array [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:logs:*:*:*",
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "SpamFilterServiceRoleDefaultPolicy85EC4A04",
+            "Roles": Array [
+              Object {
+                "Ref": "SpamFilterServiceRole799061EA",
+              },
+            ],
+          },
+          "Type": "AWS::IAM::Policy",
         },
       },
     }

@@ -124,8 +124,29 @@ export class MailDogStack extends cdk.Stack {
         }),
       ],
     });
+    const spamFilter = new lambda.NodejsFunction(this, 'SpamFilter', {
+      entry: path.resolve(__dirname, './maildog-stack.spam-filter.ts'),
+      bundling: {
+        minify: true,
+        sourceMap: false,
+      },
+      timeout: cdk.Duration.seconds(3),
+      memorySize: 128,
+      retryAttempts: 0,
+      initialPolicy: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: ['arn:aws:logs:*:*:*'],
+          actions: [
+            'logs:CreateLogGroup',
+            'logs:CreateLogStream',
+            'logs:PutLogEvents',
+          ],
+        }),
+      ],
+    });
     const ruleset = new ses.ReceiptRuleSet(this, 'ReceiptRuleSet', {
-      dropSpam: true,
+      dropSpam: false, // maybe a bug, it is not added as first rule
       rules: Object.entries(domains).flatMap(([domain, rule]) => {
         const maxRecipientsPerRule = 100;
         const recipients = rule.fallbackEmails
@@ -149,27 +170,18 @@ export class MailDogStack extends cdk.Stack {
               ? ses.TlsPolicy.REQUIRE
               : ses.TlsPolicy.OPTIONAL,
             actions: [
+              new sesActions.Lambda({
+                invocationType:
+                  sesActions.LambdaInvocationType.REQUEST_RESPONSE,
+                function: spamFilter,
+              }),
               new sesActions.S3({
                 bucket,
                 objectKeyPrefix: `${domain}/`,
                 topic: mailFeed,
               }),
-              new sesActions.Stop(),
             ],
           }));
-
-        if (!recipients.includes(domain)) {
-          rules.push({
-            enabled: rule.enabled,
-            recipients: [domain],
-            actions: [
-              new sesActions.Bounce({
-                template: sesActions.BounceTemplate.MAILBOX_DOES_NOT_EXIST,
-                sender: `${rule.fromEmail ?? 'noreply'}@${domain}`,
-              }),
-            ],
-          });
-        }
 
         return rules;
       }),
