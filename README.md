@@ -55,13 +55,7 @@ or with higher volume, you might want to [move out of the sandbox](https://docs.
 
 ### Maximum numbers of domains/alias allowed
 
-`maildog` configures SES using a receipt ruleset with some [hard limits](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/quotas.html).
-Depends on your configuration, if the domain is set with fallback emails, there is no **limit** on the alias. But if you prefer enabling defined alias only, then
-it is limited and varies based on the number of domains set and its configuration.
-
-> If only 1 domain with no fallback emails is configured, you can set up to 19,900 alias.
-
-> If 10 domains with no fallback emails are configured, you should be able to set up to 19,000 alias in total and the number is shared between all 10 domains.
+`maildog` configures SES using a receipt ruleset with a [hard limit](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/quotas.html) of up to 200 rules and 100 recipients per rule. In general, domains that are configured with fallback emails could be set with only 1 rule using wildcard. But for domains without fallback emails, every 100 alias will be count as 1 rule. As a result, you can set up to 20,000 alias if you are configuring only 1 domain even with no fallback emails.
 
 ### Regions support
 
