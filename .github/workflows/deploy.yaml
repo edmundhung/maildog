@@ -42,7 +42,7 @@ jobs:
         env:
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
-          FILENAME: config.yaml
+          FILENAME: ${{ secrets.GIST_FILENAME }}
 
       - name: Deploy stack
         run: npx cdk deploy --require-approval never
