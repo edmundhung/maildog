@@ -9,6 +9,8 @@
     "prepare": "npx is-ci || husky install",
     "type-checking": "tsc --noEmit",
     "format-checking": "prettier --check .",
+    "encrypt-config": "gpg --symmetric --yes --cipher-algo AES256 maildog.config.json",
+    "decrypt-config": "gpg --batch --yes --decrypt --output maildog.config.json",
     "test": "jest"
   },
   "repository": {
@@ -40,9 +42,7 @@
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.1",
     "semantic-release": "^17.4.3",
-    "toml": "^3.0.0",
-    "ts-jest": "^26.5.6",
-    "yaml": "^1.10.2"
+    "ts-jest": "^26.5.6"
   },
   "config": {
     "commitizen": {
