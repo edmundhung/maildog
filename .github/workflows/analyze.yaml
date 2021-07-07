@@ -3,7 +3,7 @@ name: Analyze
 on: pull_request
 
 jobs:
-  test:
+  analyze:
     name: Code Quality
     runs-on: ubuntu-latest
     steps:
@@ -27,6 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Decrypt config
+        run: npm run decrypt-config -- --passphrase="$ENCRYPT_PASSPHRASE" maildog.config.json.gpg
+        env:
+          ENCRYPT_PASSPHRASE: ${{ secrets.ENCRYPT_PASSPHRASE }}
+
       - name: Check types
         run: npm run type-checking
 
@@ -35,3 +40,15 @@ jobs:
 
       - name: Check snapshot
         run: npm test
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log CDK diff result
+        run: npx ts-node --prefer-ts-exts scripts/logCdkDiffResult.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
