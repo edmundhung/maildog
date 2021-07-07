@@ -17,3 +17,6 @@ typings/
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# maildog
+maildog.config.json
