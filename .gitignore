@@ -112,3 +112,6 @@ cdk.out
 
 # misc
 .DS_Store
+
+#maildog
+/maildog.config.json

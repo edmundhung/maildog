@@ -35,16 +35,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Read config from Gist
-        id: read-gist
-        run: npx ts-node --prefer-ts-exts scripts/readConfigFromGist.ts
+      - name: Decrypt config
+        run: npm run decrypt-config -- --passphrase="$ENCRYPT_PASSPHRASE" maildog.config.json.gpg
         env:
-          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
-          GIST_ID: ${{ secrets.GIST_ID }}
-          FILENAME: config.yaml
+          ENCRYPT_PASSPHRASE: ${{ secrets.ENCRYPT_PASSPHRASE }}
 
       - name: Log CDK diff result
         run: npx ts-node --prefer-ts-exts scripts/logCdkDiffResult.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG: ${{ steps.read-gist.outputs.result }}

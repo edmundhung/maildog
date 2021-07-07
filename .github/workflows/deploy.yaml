@@ -36,15 +36,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Read config from Gist
-        id: read-gist
-        run: npx ts-node --prefer-ts-exts scripts/readConfigFromGist.ts
+      - name: Decrypt config
+        run: npm run decrypt-config -- --passphrase="$ENCRYPT_PASSPHRASE" maildog.config.json.gpg
         env:
-          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
-          GIST_ID: ${{ secrets.GIST_ID }}
-          FILENAME: ${{ secrets.GIST_FILENAME }}
+          ENCRYPT_PASSPHRASE: ${{ secrets.ENCRYPT_PASSPHRASE }}
 
       - name: Deploy stack
         run: npx cdk deploy --require-approval never
-        env:
-          CONFIG: ${{ steps.read-gist.outputs.result }}
