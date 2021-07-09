@@ -449,6 +449,9 @@ test('Stack Snapshot', () => {
         },
         "ReceiptRuleSetD3CCC994": Object {
           "DeletionPolicy": "Delete",
+          "Properties": Object {
+            "RuleSetName": "MailDog-ReceiptRuleSet",
+          },
           "Type": "AWS::SES::ReceiptRuleSet",
           "UpdateReplacePolicy": "Delete",
         },

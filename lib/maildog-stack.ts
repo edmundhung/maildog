@@ -146,6 +146,7 @@ export class MailDogStack extends cdk.Stack {
       ],
     });
     const ruleset = new ses.ReceiptRuleSet(this, 'ReceiptRuleSet', {
+      receiptRuleSetName: `${props.stackName ?? 'MailDog'}-ReceiptRuleSet`,
       dropSpam: false, // maybe a bug, it is not added as first rule
       rules: Object.entries(domains).flatMap(([domain, rule]) => {
         const maxRecipientsPerRule = 100;

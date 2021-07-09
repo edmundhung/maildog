@@ -17,4 +17,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Check if alarm state is OK
-        run: aws cloudwatch describe-alarms --alarm-name-prefix MailDog-MailAlarm --state-value OK --output yaml | grep OK
+        run: aws cloudwatch describe-alarms --alarm-name-prefix MailDog-production-MailAlarm --state-value OK --output yaml | grep OK

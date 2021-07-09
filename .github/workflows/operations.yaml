@@ -1,12 +1,38 @@
 name: Operations
 on:
   workflow_dispatch:
+    inputs:
+      job:
+        description: 'Job Name (activate/redrive)'
+        required: true
 
 jobs:
-  redrive:
-    name: Redrive DLQ Messages
+  activate:
+    name: Activate receipt rule set
+    if: ${{ github.event.inputs.job == 'activate' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v3.x
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Activate receipt rule set based on branch name
+        run: aws ses set-active-receipt-rule-set --rule-set-name MailDog-${{ env.GITHUB_REF_SLUG_URL }}-ReceiptRuleSet
+
+  redrive:
+    name: Redrive DLQ Messages
+    if: ${{ github.event.inputs.job == 'redrive' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v3.x
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -15,4 +41,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Invoke Scheduler
-        run: aws lambda invoke --function-name $(aws lambda list-functions --query 'Functions[?starts_with(FunctionName, `MailDog-Scheduler`) == `true`].FunctionName' --output text) --output yaml response.yaml
+        run: aws lambda invoke --function-name $(aws lambda list-functions --query 'Functions[?starts_with(FunctionName, `MailDog-${{ env.GITHUB_REF_SLUG_URL }}-Scheduler`) == `true`].FunctionName' --output text) --output yaml response.yaml
