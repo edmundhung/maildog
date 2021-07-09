@@ -1,4 +1,4 @@
-name: Destroy
+name: Destroy Production
 on:
   workflow_dispatch:
     inputs:
@@ -19,6 +19,20 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          ref: production
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-npm-
+            ${{ runner.OS }}-
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -37,6 +51,8 @@ jobs:
 
       - name: Destroy stack
         run: npx cdk destroy --force
+        env:
+          ENVIRONMENT_NAME: production
 
   cleanup:
     name: Cleanup
@@ -52,7 +68,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Remove bucket and its content
-        run: aws s3 rb s3://$(aws s3api list-buckets --query "Buckets[?starts_with(Name, 'maildog-')].Name" --output text) --force
+        run: aws s3 rb s3://$(aws s3api list-buckets --query "Buckets[?starts_with(Name, 'maildog-production-')].Name" --output text) --force
 
       - name: Clear log groups from Lambda functions
-        run: aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/MailDog-" --query "logGroups[].logGroupName" --output text | xargs -I {} -n 1 aws logs delete-log-group --log-group-name {}
+        run: aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/MailDog-production-" --query "logGroups[].logGroupName" --output text | xargs -I {} -n 1 aws logs delete-log-group --log-group-name {}

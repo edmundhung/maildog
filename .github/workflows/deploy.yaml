@@ -1,13 +1,13 @@
-name: Deploy
+name: Deploy Production
 on:
-  workflow_dispatch:
   push:
-    branches: master
+    branches: production
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    environment: Production
     steps:
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -43,3 +43,5 @@ jobs:
 
       - name: Deploy stack
         run: npx cdk deploy --require-approval never
+        env:
+          ENVIRONMENT_NAME: production

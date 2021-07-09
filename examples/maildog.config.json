@@ -1,0 +1,16 @@
+{
+    "domains": {
+      "maildog.edmund.dev": {
+        "enabled": true,
+        "fromEmail": "noreply",
+        "scanEnabled": true,
+        "tlsEnforced": true,
+        "forwardingEmail": {
+          "tester": {
+            "description": "For testing",
+            "to": ["me@edmund.dev"]
+          }
+        }
+      }
+    }
+  }

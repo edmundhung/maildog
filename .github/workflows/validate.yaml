@@ -1,0 +1,102 @@
+name: Validate Changes
+on:
+  pull_request:
+    types: [opened, synchronize, closed, reopened]
+
+jobs:
+  validate:
+    name: Deploy changes
+    runs-on: ubuntu-latest
+    if: ${{ github.event.action != 'closed' }}
+    environment: Test
+    steps:
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-npm-
+            ${{ runner.OS }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v3.x
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Copy example config
+        run: cp ./examples/maildog.config.json maildog.config.json
+
+      - name: Deploy stack
+        run: npx cdk deploy --require-approval never
+        env:
+          ENVIRONMENT_NAME: ${{ env.GITHUB_HEAD_REF_SLUG_URL }}
+
+  teardown:
+    name: Destroy changes
+    runs-on: ubuntu-latest
+    if: ${{ github.event.action == 'closed' }}
+    environment: Test
+    steps:
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-npm-
+            ${{ runner.OS }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v3.x
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Copy example config
+        run: cp ./examples/maildog.config.json maildog.config.json
+
+      - name: Deactivate receipt rule set
+        run: aws ses set-active-receipt-rule-set
+
+      - name: Destroy stack
+        run: npx cdk destroy --force
+        env:
+          ENVIRONMENT_NAME: ${{ env.GITHUB_HEAD_REF_SLUG_URL }}
+
+      - name: Remove bucket and its content
+        run: aws s3 rb s3://$(aws s3api list-buckets --query "Buckets[?starts_with(Name, 'maildog-${{ env.GITHUB_HEAD_REF_SLUG_URL }}-')].Name" --output text) --force
+
+      - name: Clear log groups from Lambda functions
+        run: aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/MailDog-${{ env.GITHUB_HEAD_REF_SLUG_URL }}-" --query "logGroups[].logGroupName" --output text | xargs -I {} -n 1 aws logs delete-log-group --log-group-name {}
