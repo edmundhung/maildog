@@ -2,6 +2,8 @@ name: Validate Changes
 on:
   pull_request:
     types: [opened, synchronize, closed, reopened]
+    branches:
+      - main
 
 jobs:
   validate:
