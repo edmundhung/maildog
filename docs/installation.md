@@ -207,13 +207,8 @@ gh workflow view --web deploy.yaml
 You can delete everything deployed easily with the destory workflow:
 
 ```sh
-# Destroy without cleanup
-gh workflow run destroy.yml --ref production
-```
-
-```sh
-# Destroy and cleanup bucket & logs
-gh workflow run destroy.yml --ref production -f "Cleanup bucket & logs (yes/no)"=yes
+# Check the destroy workflow from Github
+gh workflow view --web destroy.yaml
 ```
 
 ### 3.4 Monitor with Heath check
