@@ -15,7 +15,7 @@ test('Stack Snapshot', () => {
           fromEmail: 'noreply',
           scanEnabled: true,
           tlsEnforced: true,
-          forwardingEmail: {
+          alias: {
             foo: {
               to: ['example@gmail.com'],
             },
@@ -32,16 +32,16 @@ test('Stack Snapshot', () => {
   expect(SynthUtils.toCloudFormation(stack)).toMatchInlineSnapshot(`
     Object {
       "Parameters": Object {
-        "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01ArtifactHashCB808D06": Object {
-          "Description": "Artifact hash for asset \\"3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01\\"",
+        "AssetParameters660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aaArtifactHashCA298FB1": Object {
+          "Description": "Artifact hash for asset \\"660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aa\\"",
           "Type": "String",
         },
-        "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3Bucket3702998F": Object {
-          "Description": "S3 bucket for asset \\"3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01\\"",
+        "AssetParameters660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aaS3Bucket52249DB7": Object {
+          "Description": "S3 bucket for asset \\"660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aa\\"",
           "Type": "String",
         },
-        "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3VersionKeyB621FC29": Object {
-          "Description": "S3 key for asset version \\"3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01\\"",
+        "AssetParameters660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aaS3VersionKey4D826DB7": Object {
+          "Description": "S3 key for asset version \\"660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aa\\"",
           "Type": "String",
         },
         "AssetParametersca8674af2868d9931918a5aee74ec64978ec3f5baba1b392bdfb306204b15f59ArtifactHashCFA7ACFB": Object {
@@ -231,7 +231,7 @@ test('Stack Snapshot', () => {
           "Properties": Object {
             "Code": Object {
               "S3Bucket": Object {
-                "Ref": "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3Bucket3702998F",
+                "Ref": "AssetParameters660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aaS3Bucket52249DB7",
               },
               "S3Key": Object {
                 "Fn::Join": Array [
@@ -244,7 +244,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3VersionKeyB621FC29",
+                              "Ref": "AssetParameters660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aaS3VersionKey4D826DB7",
                             },
                           ],
                         },
@@ -257,7 +257,7 @@ test('Stack Snapshot', () => {
                           "Fn::Split": Array [
                             "||",
                             Object {
-                              "Ref": "AssetParameters3c4c5bf6ccd5d8f78177458a9f4838d6502a822accd99c12b4beb1c705848b01S3VersionKeyB621FC29",
+                              "Ref": "AssetParameters660b50b0fe61d45a80f5d22101cce4d442d90d4270c49d02097537bae09750aaS3VersionKey4D826DB7",
                             },
                           ],
                         },

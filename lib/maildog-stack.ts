@@ -21,7 +21,7 @@ interface MailDogDomainRule {
   scanEnabled?: boolean;
   tlsEnforced?: boolean;
   fallbackEmails?: string[];
-  forwardingEmail?: Record<string, MailDogForwardingRule>;
+  alias?: Record<string, MailDogForwardingRule>;
 }
 
 interface MailDogConfig {
@@ -77,10 +77,8 @@ export class MailDogStack extends cdk.Stack {
           'process.env.CONFIG_PER_KEY_PREFIX': JSON.stringify(
             Object.entries(domains).reduce((result, [domain, rule]) => {
               result[`${domain}/`] = {
-                fromEmail: rule.fromEmail
-                  ? `${rule.fromEmail}@${domain}`
-                  : null,
-                forwardMapping: Object.entries(rule.forwardingEmail ?? {})
+                fromEmail: `${rule.fromEmail ?? 'noreply'}@${domain}`,
+                forwardMapping: Object.entries(rule.alias ?? {})
                   .concat(
                     rule.fallbackEmails
                       ? [['', { to: rule.fallbackEmails }]]
@@ -152,7 +150,7 @@ export class MailDogStack extends cdk.Stack {
         const maxRecipientsPerRule = 100;
         const recipients = rule.fallbackEmails
           ? [domain]
-          : Object.keys(rule.forwardingEmail ?? {}).map(
+          : Object.keys(rule.alias ?? {}).map(
               (prefix) => `${prefix}@${domain}`,
             );
         const rules = recipients
