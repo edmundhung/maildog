@@ -15,7 +15,13 @@
     {
       "Sid": "SES",
       "Effect": "Allow",
-      "Action": ["cloudformation:*", "cloudwatch:DescribeAlarms", "ses:*"],
+      "Action": [
+        "cloudformation:*",
+        "cloudwatch:DescribeAlarms",
+        "s3:ListAllMyBuckets",
+        "logs:*",
+        "ses:*"
+      ],
       "Resource": "*"
     },
     {
