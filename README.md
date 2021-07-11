@@ -1,7 +1,5 @@
 # maildog
 
-[![health](https://github.com/edmundhung/maildog/actions/workflows/health.yaml/badge.svg)](https://github.com/edmundhung/maildog/actions/workflows/operations.yaml)
-
 > 🦴 Hosting your own email forwarding service on AWS\
 > 🐶 Managing with Github actions\
 > 🩺 Monitoring and failure recovery included\

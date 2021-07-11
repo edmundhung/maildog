@@ -1,7 +1,7 @@
 {
   "name": "maildog",
   "version": "0.1.0",
-  "description": "",
+  "description": "Hosting your own email forwarding service on AWS and manage it with Github Actions",
   "bin": {
     "email-masking": "bin/email-masking.js"
   },
@@ -17,7 +17,11 @@
     "type": "git",
     "url": "git+https://github.com/edmundhung/maildog.git"
   },
-  "author": "",
+  "author": {
+    "name": "Edmund Hung",
+    "email": "me@edmund.dev",
+    "url": "https://github.com/edmundhung"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/edmundhung/maildog/issues"
