@@ -1,0 +1,55 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Cloudwatch",
+      "Effect": "Allow",
+      "Action": "cloudwatch:*",
+      "Resource": [
+        "arn:aws:cloudwatch:*:*:metric-stream/MailDog-*",
+        "arn:aws:cloudwatch::*:dashboard/MailDog-*",
+        "arn:aws:cloudwatch:*:*:insight-rule/MailDog-*",
+        "arn:aws:cloudwatch:*:*:alarm:MailDog-*"
+      ]
+    },
+    {
+      "Sid": "SES",
+      "Effect": "Allow",
+      "Action": ["cloudformation:*", "cloudwatch:DescribeAlarms", "ses:*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "LAMBDA",
+      "Effect": "Allow",
+      "Action": "lambda:*",
+      "Resource": "arn:aws:lambda:*:*:function:MailDog-*"
+    },
+    {
+      "Sid": "SQS",
+      "Effect": "Allow",
+      "Action": "sqs:*",
+      "Resource": "arn:aws:sqs:*:*:MailDog-*"
+    },
+    {
+      "Sid": "SNS",
+      "Effect": "Allow",
+      "Action": "sns:*",
+      "Resource": "arn:aws:sns:*:*:MailDog-*"
+    },
+    {
+      "Sid": "S3",
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::cdktoolkit-stagingbucket-*",
+        "arn:aws:s3:::maildog-*"
+      ]
+    },
+    {
+      "Sid": "IAM",
+      "Effect": "Allow",
+      "Action": "iam:*",
+      "Resource": "arn:aws:iam::*:role/MailDog-*"
+    }
+  ]
+}

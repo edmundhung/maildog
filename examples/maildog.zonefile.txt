@@ -1,0 +1,15 @@
+;;
+;; To complete verification of ${Domain},
+;; you must add the following records to the domain's DNS settings:
+;;
+
+;; CNAME Records
+${DkimToken[0]}._domainkey.${Domain}.	1	IN	CNAME	${DkimToken[0]}.dkim.amazonses.com.
+${DkimToken[1]}._domainkey.${Domain}.	1	IN	CNAME	${DkimToken[1]}.dkim.amazonses.com.
+${DkimToken[2]}._domainkey.${Domain}.	1	IN	CNAME	${DkimToken[2]}.dkim.amazonses.com.
+
+;; MX Records
+${Domain}.	1	IN	MX	10 inbound-smtp.${Region}.amazonaws.com.
+
+;; TXT Records
+_amazonses.${Domain}.	1	IN	TXT	"${VerificationToken}"

@@ -59,10 +59,14 @@ or with higher volume, you might want to [move out of the sandbox](https://docs.
 
 ### Regions support
 
-Not every region support receiving emails with AWS SES. As of 30 June 2021, only 3 regions you can deploy `maildog` on:
+Not every region supports receiving emails with AWS SES. As of 30 June 2021, only 3 regions you can deploy `maildog` on:
 
 1. US East (N. Virginia)
 2. US West (Oregon)
 3. Europe (Ireland)
 
 Please check the [AWS documentation](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/regions.html#region-receive-email) for the latest update.
+
+## 📮 Give it a try?
+
+You can find the installation guide [here](docs/installation.md). The setup might take 10-20 minutes.
