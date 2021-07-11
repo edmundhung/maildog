@@ -16,6 +16,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          ref: production
 
       - name: Cache dependencies
         uses: actions/cache@v2
