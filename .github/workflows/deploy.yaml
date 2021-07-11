@@ -50,3 +50,6 @@ jobs:
         run: npx cdk deploy --require-approval never
         env:
           ENVIRONMENT_NAME: production
+
+      - name: Activate receipt rule set
+        run: aws ses set-active-receipt-rule-set --rule-set-name MailDog-production-ReceiptRuleSet
