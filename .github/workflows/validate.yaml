@@ -45,7 +45,10 @@ jobs:
       - name: Copy example config
         run: cp ./examples/maildog.config.json maildog.config.json
 
-      - name: Deploy stack
+      - name: Deploy the CDK toolkit stack
+        run: npx cdk bootstrap
+
+      - name: Deploy maildog
         run: npx cdk deploy --require-approval never
         env:
           ENVIRONMENT_NAME: ${{ env.GITHUB_HEAD_REF_SLUG_URL }}
