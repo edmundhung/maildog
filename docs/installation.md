@@ -62,7 +62,7 @@ git checkout -b production
 ### 2.2 Configure `maildog` with `maildog.config.json`
 
 A JSON file with the name `maildog.config.json` is required at the root of the project.
-The format as follow:
+The format as follows:
 
 ```
 {
@@ -85,7 +85,7 @@ The format as follow:
 
 - **fromEmail**: The sender email address used when `maildog` forward the email
 - **scanEnabled**: If true, then emails received will be scanned for spam and viruses
-- **tlsEnforece**: Specifies whether `maildog` should require that incoming email is delivered over a connection encrypted with Transport Layer Security (TLS).
+- **tlsEnforced**: Specifies whether `maildog` should require that incoming email is delivered over a connection encrypted with Transport Layer Security (TLS).
 - **fallbackEmails**: A catch-all / wildcard rule. All emails received on the corresponding domain will be forwarded to these email addresses unless specified in the `alias` section.
 - **alias**: The email prefix with a `description` and list of email addresses forwarding `to`
 
@@ -204,14 +204,14 @@ gh workflow view --web deploy.yaml
 
 ### 3.3 Destroy maildog
 
-You can delete everything deployed easily with the destory workflow:
+You can delete everything deployed easily with the destroy workflow:
 
 ```sh
 # Check the destroy workflow from Github
 gh workflow view --web destroy.yaml
 ```
 
-### 3.4 Monitor with Heath check
+### 3.4 Monitor with Health check
 
 `maildog` sends failed messages to the Dead Letter Queue (DLQ). The health workflow works by monitoring the alarm status configured to the DLQ every hour. You can enable it if needed:
 
