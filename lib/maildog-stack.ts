@@ -10,22 +10,23 @@ import * as snsSubscriptions from '@aws-cdk/aws-sns-subscriptions';
 import * as sqs from '@aws-cdk/aws-sqs';
 import * as path from 'path';
 import { DispatcherConfig } from './maildog-stack.dispatcher';
-interface MailDogForwardingRule {
-  description?: string;
+
+interface MailDogAliasRule {
+  description: string;
   to: string[];
 }
 
 interface MailDogDomainRule {
-  enabled?: boolean;
-  fromEmail?: string;
-  scanEnabled?: boolean;
-  tlsEnforced?: boolean;
-  fallbackEmails?: string[];
-  alias?: Record<string, MailDogForwardingRule>;
+  enabled: boolean;
+  fromEmail: string;
+  scanEnabled: boolean;
+  tlsEnforced: boolean;
+  fallbackEmails: string[];
+  alias: Record<string, Partial<MailDogAliasRule>>;
 }
 
 interface MailDogConfig {
-  domains: Record<string, MailDogDomainRule>;
+  domains: Record<string, Partial<MailDogDomainRule>>;
 }
 
 interface MailDogStackProps extends cdk.StackProps {
@@ -37,7 +38,19 @@ export class MailDogStack extends cdk.Stack {
     super(scope, id, props);
 
     // The code that defines your stack goes here
-    const { domains } = props.config;
+    const domainRuleEntries = Object.entries(props.config.domains).map<
+      [string, MailDogDomainRule]
+    >(([domain, rule]) => [
+      domain,
+      {
+        enabled: rule.enabled ?? true,
+        fromEmail: rule.fromEmail ?? 'noreply',
+        scanEnabled: rule.scanEnabled ?? true,
+        tlsEnforced: rule.tlsEnforced ?? false,
+        fallbackEmails: rule.fallbackEmails ?? [],
+        alias: rule.alias ?? {},
+      },
+    ]);
     const bucket = new s3.Bucket(this, 'Bucket', {
       lifecycleRules: [
         {
@@ -75,24 +88,28 @@ export class MailDogStack extends cdk.Stack {
         sourceMap: false,
         define: {
           'process.env.CONFIG_PER_KEY_PREFIX': JSON.stringify(
-            Object.entries(domains).reduce((result, [domain, rule]) => {
-              result[`${domain}/`] = {
-                fromEmail: `${rule.fromEmail ?? 'noreply'}@${domain}`,
-                forwardMapping: Object.entries(rule.alias ?? {})
-                  .concat(
-                    rule.fallbackEmails
-                      ? [['', { to: rule.fallbackEmails }]]
-                      : [],
-                  )
-                  .reduce((mapping, [prefix, entry]) => {
-                    mapping[`${prefix}@${domain}`] = entry.to;
-
-                    return mapping;
-                  }, {} as Record<string, string[]>),
-              };
-
-              return result;
-            }, {} as Record<string, DispatcherConfig>),
+            Object.fromEntries(
+              domainRuleEntries.map<[string, DispatcherConfig]>(
+                ([domain, rule]) => [
+                  `${domain}/`,
+                  {
+                    fromEmail: `${rule.fromEmail}@${domain}`,
+                    forwardMapping: Object.fromEntries(
+                      Object.entries(rule.alias)
+                        .concat(
+                          rule.fallbackEmails.length > 0
+                            ? [['', { to: rule.fallbackEmails }]]
+                            : [],
+                        )
+                        .map(([alias, entry]) => [
+                          `${alias}@${domain}`,
+                          entry.to ?? [],
+                        ]),
+                    ),
+                  },
+                ],
+              ),
+            ),
           ),
         },
       },
@@ -146,13 +163,26 @@ export class MailDogStack extends cdk.Stack {
     const ruleset = new ses.ReceiptRuleSet(this, 'ReceiptRuleSet', {
       receiptRuleSetName: `${props.stackName ?? 'MailDog'}-ReceiptRuleSet`,
       dropSpam: false, // maybe a bug, it is not added as first rule
-      rules: Object.entries(domains).flatMap(([domain, rule]) => {
+      rules: domainRuleEntries.flatMap(([domain, rule]) => {
         const maxRecipientsPerRule = 100;
-        const recipients = rule.fallbackEmails
-          ? [domain]
-          : Object.keys(rule.alias ?? {}).map(
-              (prefix) => `${prefix}@${domain}`,
-            );
+        const recipients =
+          rule.fallbackEmails.length > 0
+            ? [domain]
+            : Object.entries(rule.alias)
+                .filter(([_, entry]) => {
+                  if (
+                    typeof entry.to === 'undefined' ||
+                    entry.to.length === 0
+                  ) {
+                    console.warn(
+                      '[maildog] Alias with no forwarding email addresses found; It will be disabled if no fallback emails are set',
+                    );
+                    return false;
+                  }
+
+                  return true;
+                })
+                .map(([alias]) => `${alias}@${domain}`);
         const rules = recipients
           .reduce((chunks, _, i, list) => {
             if (i % maxRecipientsPerRule === 0) {
