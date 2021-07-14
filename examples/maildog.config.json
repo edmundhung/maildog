@@ -1,15 +1,30 @@
+// This config file support jsonc (json with comment)
+// It simply adds support to single line (//) and multi-line comments (/* ... */) on `json` document
 {
-    "domains": {
-      "maildog.edmund.dev": {
-        "fromEmail": "noreply",
-        "scanEnabled": true,
-        "tlsEnforced": true,
-        "alias": {
-          "tester": {
-            "description": "For testing",
-            "to": ["me@edmund.dev"]
-          }
+  "domains": {
+    /*
+    "exmaple.com": {
+      "fromEmail": "foo",
+      "scanEnabled": false,
+      "tlsEnforced": false,
+      "alias": {
+        "bar": {
+          "description": "Lorem ipsum dolor sit amet, consectetur",
+          "to": ["tester@maildog.edmund.dev"]
+        }
+      }
+    },
+    */
+    "maildog.edmund.dev": {
+      "fromEmail": "noreply",
+      "scanEnabled": true,
+      "tlsEnforced": true,
+      "alias": {
+        "tester": {
+          "description": "For testing", // For your reference only
+          "to": ["me@edmund.dev"]
         }
       }
     }
   }
+}
