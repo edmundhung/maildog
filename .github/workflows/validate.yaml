@@ -9,7 +9,7 @@ jobs:
   validate:
     name: Deploy changes
     runs-on: ubuntu-latest
-    if: ${{ github.event.action != 'closed' }}
+    if: ${{ github.actor == github.repository_owner && github.event.action != 'closed' }}
     environment: Test
     steps:
       - name: Set up Node
@@ -56,7 +56,7 @@ jobs:
   teardown:
     name: Destroy changes
     runs-on: ubuntu-latest
-    if: ${{ github.event.action == 'closed' }}
+    if: ${{ github.actor == github.repository_owner && github.event.action == 'closed' }}
     environment: Test
     steps:
       - name: Set up Node
