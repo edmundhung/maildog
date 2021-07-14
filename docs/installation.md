@@ -105,7 +105,7 @@ sed \
 -e "s|\${DkimToken\[0\]}|$(aws ses verify-domain-dkim --domain "$DOMAIN" --query DkimTokens[0] --output text)|g" \
 -e "s|\${DkimToken\[1\]}|$(aws ses verify-domain-dkim --domain "$DOMAIN" --query DkimTokens[1] --output text)|g" \
 -e "s|\${DkimToken\[2\]}|$(aws ses verify-domain-dkim --domain "$DOMAIN" --query DkimTokens[2] --output text)|g" \
-./examples/maildog-zonefile.txt
+./examples/maildog.zonefile.txt
 ```
 
 If you are new to AWS SES and you are setting up with the sandbox. You **MUST** verify the email address that you are forwarding to with AWS using the following command:
