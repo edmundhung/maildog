@@ -64,18 +64,23 @@ git checkout -b production
 A JSON file with the name `maildog.config.json` is required at the root of the project.
 The format as follows:
 
-```
+```jsonc
+// This config file support json with comment (jsonc)
+// It simply adds support to single line (//) and multi-line comments (/* ... */) on `json` document
 {
   "domains": {
-    "[YOUR DOMAIN HERE]": {
-      "fromEmail": <string>,             // optional, default: "noreply"
-      "scanEnabled": <boolean>,          // optional, default: true,
-      "tlsEnforced": <boolean>,          // optional, default: false,
-      "fallbackEmails": <string[]>,      // optional, default: []
-      "alias": {                         // required if fallbackEmails are not set
-        "<string>": {
-          "description": <string>,       // optional, default: ""
-          "to": <string[]>               // required
+    "exmaple.com": {
+      // your domain here
+      "fromEmail": "foo", // optional, default: "noreply"
+      "scanEnabled": false, // optional, default: true,
+      "tlsEnforced": false, // optional, default: false,
+      "fallbackEmails": [], // optional, default: []
+      "alias": {
+        // required if `fallbackEmails` are not set
+        "bar": {
+          // result in `bar@exmaple.com`
+          "description": "Lorem ipsum", // optional, default: ""
+          "to": ["baz@exmaple.com"] // required
         }
       }
     }
