@@ -19,7 +19,9 @@ The project aims to offer an extensible email forwarding solution with minimal m
 
 ## ☁️ How it works?
 
-![MailDog Architecture](docs/architecture.png)
+[![MailDog Architecture](docs/architecture.png)](https://app.cloudcraft.co/view/d3b3c7fb-3e31-445c-ae5a-3fd3cf5080d6?key=VbwNoP3q1N5efAlrXGHK2Q&interactive=true&embed=true)
+
+> Hint: you can click on the diagram for higher resolution
 
 ## 💸 Pricing
 
