@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/edmundhung/maildog/compare/v1.0.1...v1.1.0) (2021-07-15)
+
+
+### Features
+
+* add support of comment on the JSON config file with `jsonc` ([5bc1ebb](https://github.com/edmundhung/maildog/commit/5bc1ebbcf400ffe827cb4184181e7e7d77ac9b80)), closes [#7](https://github.com/edmundhung/maildog/issues/7)
+
 ## [1.0.1](https://github.com/edmundhung/maildog/compare/v1.0.0...v1.0.1) (2021-07-15)
 
 
