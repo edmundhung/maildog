@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/edmundhung/maildog/compare/v1.0.0...v1.0.1) (2021-07-15)
+
+
+### Bug Fixes
+
+* ensure config work as stated on documentation ([7247342](https://github.com/edmundhung/maildog/commit/7247342778deb8b1f09e1415cd05f53bad7082d9)), closes [#12](https://github.com/edmundhung/maildog/issues/12)
+
 # 1.0.0 (2021-07-11)
 
 

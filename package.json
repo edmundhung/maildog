@@ -1,6 +1,6 @@
 {
   "name": "maildog",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Hosting your own email forwarding service on AWS and manage it with Github Actions",
   "bin": {
     "email-masking": "bin/email-masking.js"
