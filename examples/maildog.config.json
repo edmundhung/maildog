@@ -16,13 +16,13 @@
       }
     },
     */
-    "maildog.edmund.dev": {
+    "maildog.dev": {
       "fromEmail": "noreply",
       "scanEnabled": true,
       "tlsEnforced": true,
       "alias": {
-        "tester": {
-          "description": "For testing", // For your reference only
+        "edmund": {
+          "description": "Author", // For your reference only
           "to": ["me@edmund.dev"]
         }
       }
