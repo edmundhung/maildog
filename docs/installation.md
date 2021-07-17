@@ -2,6 +2,8 @@
 
 Before start, please make sure you understand the [potential cost](../README.md#-pricing) and the [limitations](../README.md#-limitations).
 
+> If you need support, feel free to contact [me](mailto:maildog@edmund.dev).
+
 ## 1. Preparation
 
 ### 1.1 Decide on one AWS region
@@ -45,11 +47,18 @@ To begin, please fork the repository and clone it locally.
 ```sh
 # Fork and clone it at the same time
 gh repo fork edmundhung/maildog --clone
+# Or if you would like to create a fork in an organization
+# gh repo fork edmundhung/maildog --clone --org name-of-organization
 ```
 
 ```sh
 # From now on, all commands provided assumes the root of the project being your working directory
 cd maildog
+```
+
+```sh
+# Ensure all `gh` command works against your fork instead of the original repository
+export GH_REPO=[YOUR USER/ORGANIZATION NAME]/maildog;
 ```
 
 ```sh
