@@ -1,0 +1,65 @@
+{
+  "manifest_version": 2,
+  "name": "MailDog WebExtension",
+  "version": "0.0.0",
+
+  "icons": {
+    "16": "assets/icons/favicon-16.png",
+    "32": "assets/icons/favicon-32.png",
+    "48": "assets/icons/favicon-48.png",
+    "128": "assets/icons/favicon-128.png"
+  },
+  "description": "Hosting your own email forwarding service on AWS and manage it with Github Actions",
+  "homepage_url": "https://maildog.dev",
+  "short_name": "maildog",
+
+  "permissions": ["activeTab", "storage", "http://*/*", "https://*/*"],
+
+  "content_security_policy": "script-src 'self'; object-src 'self'",
+
+  "__chrome|firefox__author": "edmundhung",
+  "__opera__developer": {
+    "name": "edmundhung"
+  },
+
+  "__firefox__applications": {
+    "gecko": {
+      "id": "{}"
+    }
+  },
+
+  "__chrome__minimum_chrome_version": "49",
+  "__opera__minimum_opera_version": "36",
+
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/icons/favicon-16.png",
+      "32": "assets/icons/favicon-32.png",
+      "48": "assets/icons/favicon-48.png",
+      "128": "assets/icons/favicon-128.png"
+    },
+    "default_title": "tiny title",
+    "__chrome|opera__chrome_style": false,
+    "__firefox__browser_style": false
+  },
+
+  "__chrome|opera__options_page": "options.html",
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true,
+    "__chrome__chrome_style": false
+  },
+
+  "background": {
+    "scripts": ["js/background.bundle.js"],
+    "__chrome|opera__persistent": false
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["js/contentScript.bundle.js"]
+    }
+  ]
+}
