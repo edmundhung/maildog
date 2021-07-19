@@ -2,6 +2,9 @@
   "name": "maildog",
   "version": "1.1.0",
   "description": "Hosting your own email forwarding service on AWS and manage it with Github Actions",
+  "workspaces": [
+    "packages/extensions"
+  ],
   "bin": {
     "email-masking": "bin/email-masking.js"
   },
@@ -47,6 +50,9 @@
     "prettier": "^2.3.1",
     "semantic-release": "^17.4.3",
     "ts-jest": "^26.5.6"
+  },
+  "engines": {
+    "npm": ">=7.0.0"
   },
   "config": {
     "commitizen": {
