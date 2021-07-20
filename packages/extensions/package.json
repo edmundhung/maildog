@@ -7,7 +7,7 @@
     "chrome": "TARGET_BROWSER=chrome webpack",
     "firefox": "TARGET_BROWSER=firefox webpack",
     "opera": "TARGET_BROWSER=opera webpack",
-    "build": "npm run chrome & npm run firefox & npm run opera & wait"
+    "build": "export NODE_ENV=production; npm run chrome & npm run firefox & npm run opera & wait"
   },
   "author": {
     "name": "Edmund Hung",

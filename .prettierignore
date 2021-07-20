@@ -24,7 +24,7 @@ maildog.config.json
 
 # Generated files
 CHANGELOG.md
+build
+dist
 packages/web/worker.js
 packages/web/app/styles
-packages/web/build
-packages/web/public/build
