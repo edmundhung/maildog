@@ -1,7 +1,8 @@
 name: Validate Changes
 on:
   pull_request:
-    types: [opened, synchronize, closed, reopened]
+    # types: [opened, synchronize, closed, reopened]
+    types: [closed]
     paths-ignore:
       - 'docs/**'
       - README.md
