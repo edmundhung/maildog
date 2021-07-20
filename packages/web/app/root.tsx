@@ -22,10 +22,11 @@ function Document({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width" />
         <Meta />
         <Links />
       </head>
-      <body className="font-light bg-white text-black dark:bg-black dark:text-white pt-32 pb-8 px-20">
+      <body className="font-light bg-white text-black dark:bg-black dark:text-white pt-16 px-10 md:pt-32 md:pb-8 md:px-20">
         {children}
 
         <Scripts />
