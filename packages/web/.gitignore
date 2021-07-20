@@ -1,0 +1,13 @@
+# Node
+node_modules
+
+# Remix build
+/.cache
+/build
+/public/build
+
+# Postcss build
+/app/styles
+
+# Worker related
+/worker.js
