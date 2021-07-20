@@ -1,0 +1,21 @@
+name = "maildog-web"
+type = "javascript"
+account_id = "c63d756a160ad09cd9a82553c77e9174"
+workers_dev = true
+kv_namespaces = []
+
+[env.production]
+workers_dev = false
+zone_id = "06b50a41887577c55b758cd7df9ed9c4"
+route = "maildog.dev/*"
+
+[site]
+bucket = "./public"
+entry-point = "."
+
+[build]
+command = "npm run build"
+watch_dir = "app"
+
+[build.upload]
+format="service-worker"
