@@ -2,7 +2,7 @@ import * as React from 'react';
 import { browser, Tabs } from 'webextension-polyfill-ts';
 
 function openWebPage(url: string): Promise<Tabs.Tab> {
-  return browser.tabs.create({url});
+  return browser.tabs.create({ url });
 }
 
 function authorize() {
@@ -12,7 +12,9 @@ function authorize() {
     ['state', Math.random().toString(36).slice(2)],
   ]);
 
-  return openWebPage(`https://github.com/login/oauth/authorize?${searchParams.toString()}`);
+  return openWebPage(
+    `https://github.com/login/oauth/authorize?${searchParams.toString()}`,
+  );
 }
 
 function Popup(): React.ReactElement {
@@ -32,6 +34,6 @@ function Popup(): React.ReactElement {
       </main>
     </section>
   );
-};
+}
 
 export default Popup;
