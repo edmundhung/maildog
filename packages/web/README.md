@@ -5,7 +5,7 @@ Built with [Remix](https://remix.run/), deployed to [Cloudflare Workers](https:/
 ## Development
 
 ```sh
-npm run dev
+npm start
 ```
 
 This starts your app in development mode, rebuilding assets on file changes.
