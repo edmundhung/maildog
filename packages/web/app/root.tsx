@@ -1,8 +1,8 @@
-import type { LinksFunction } from "remix";
-import { Meta, Links, Scripts, LiveReload } from "remix";
-import { Outlet } from "react-router-dom";
-
-import stylesUrl from "./styles/global.css";
+import type { LinksFunction } from 'remix';
+import { Meta, Links, Scripts, LiveReload } from 'remix';
+import { Outlet } from 'react-router-dom';
+import { useShouldRenderDocument } from './api';
+import stylesUrl from './styles/global.css';
 
 export let meta: MetaFunction = () => {
   return {
@@ -37,6 +37,12 @@ function Document({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const shouldRenderDocument = useShouldRenderDocument();
+
+  if (!shouldRenderDocument) {
+    return <Outlet />;
+  }
+
   return (
     <Document>
       <Outlet />

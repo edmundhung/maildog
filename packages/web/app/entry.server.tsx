@@ -1,6 +1,7 @@
-import ReactDOMServer from "react-dom/server";
-import type { EntryContext } from "remix";
-import { RemixServer } from "remix";
+import ReactDOMServer from 'react-dom/server';
+import type { EntryContext } from 'remix';
+import { RemixServer } from 'remix';
+import { unescapeHtml } from './api';
 
 export default function handleRequest(
   request: Request,
@@ -8,15 +9,21 @@ export default function handleRequest(
   responseHeaders: Headers,
   remixContext: EntryContext
 ) {
-  let markup = ReactDOMServer.renderToString(
-    <RemixServer context={remixContext} url={request.url} />
+  const markup = ReactDOMServer.renderToString(
+    <RemixServer context={remixContext} url={request.url} />,
   );
 
-  return new Response("<!DOCTYPE html>" + markup, {
+  if (!responseHeaders.has('Content-Type')) {
+    responseHeaders.set('Content-Type', 'text/html');
+  }
+
+  const body =
+    responseHeaders.get('Content-Type') === 'text/html'
+      ? `<!DOCTYPE html>${markup}`
+      : unescapeHtml(markup);
+
+  return new Response(body, {
     status: responseStatusCode,
-    headers: {
-      ...Object.fromEntries(responseHeaders),
-      "Content-Type": "text/html"
-    }
+    headers: responseHeaders,
   });
 }
