@@ -18,6 +18,12 @@ typings/
 .cdk.staging
 cdk.out
 
-# maildog
+# Config files
+.babelrc
 maildog.config.json
+
+# Generated files
 CHANGELOG.md
+build
+packages/web/worker.js
+packages/web/app/styles
