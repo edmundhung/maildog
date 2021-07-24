@@ -1,4 +1,3 @@
-import type { MetaFunction } from 'remix';
 import { Link } from 'react-router-dom';
 
 export default function FourOhFour() {

@@ -1,4 +1,4 @@
-import type { LinksFunction } from 'remix';
+import type { LinksFunction, MetaFunction } from 'remix';
 import { Meta, Links, Scripts, LiveReload } from 'remix';
 import { Outlet } from 'react-router-dom';
 import { useShouldRenderDocument } from './api';

@@ -1,8 +1,23 @@
 {
   "compilerOptions": {
+    "rootDir": ".",
     "target": "esnext",
     "module": "commonjs",
-    "lib": ["esnext", "webworker"],
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "esnext", "webworker"],
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictPropertyInitialization": true,
     "types": ["@cloudflare/workers-types"]
   }
 }

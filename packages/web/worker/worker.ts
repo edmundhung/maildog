@@ -11,7 +11,7 @@ import {
 
 async function handleAsset(
   event: FetchEvent,
-  mode: string,
+  mode?: string,
 ): Promise<Response | null> {
   try {
     const options: Parameters<typeof getAssetFromKV>[1] = {};

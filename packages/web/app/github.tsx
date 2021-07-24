@@ -1,14 +1,13 @@
-import type { Session } from 'remix';
-import { redirect } from 'remix';
-import { App, Installation, Octokit } from '@octokit/app';
-import { getSession, destroySession, commitSession } from './auth';
+import { App } from '@octokit/app';
+
+type Octokit = ReturnType<typeof app.oauth.getUserOctokit>;
 
 const app = new App({
-  appId: process.env.GITHUB_APP_ID,
-  privateKey: process.env.GITHUB_APP_PRIVATE_KEY,
+  appId: process.env.GITHUB_APP_ID ?? '',
+  privateKey: process.env.GITHUB_APP_PRIVATE_KEY ?? '',
   oauth: {
-    clientId: process.env.GITHUB_APP_CLIENT_ID,
-    clientSecret: process.env.GITHUB_APP_CLIENT_SECRET,
+    clientId: process.env.GITHUB_APP_CLIENT_ID ?? '',
+    clientSecret: process.env.GITHUB_APP_CLIENT_SECRET ?? '',
   },
 });
 
@@ -36,7 +35,10 @@ export function getWebFlowAuthorizationUrl(
  * @param {string}[state] The unguessable random string provided with web application flow
  * @returns accessToken
  */
-export async function createToken(code: string, state?: string): string {
+export async function createToken(
+  code: string,
+  state?: string,
+): Promise<string> {
   const response = await app.oauth.createToken({ code, state });
 
   return response.authentication.token;
