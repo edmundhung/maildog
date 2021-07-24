@@ -9,9 +9,10 @@ esbuild.build({
   outfile: './worker.js',
   plugins: [
     alias({
-      fs: require.resolve('./null.js'),
-      crypto: require.resolve('./null.js'),
-      path: require.resolve('./null.js'),
+      'fs': require.resolve('./null.js'),
+      'crypto': require.resolve('./null.js'),
+      'path': require.resolve('./null.js'),
+      'node-fetch': require.resolve('./global-fetch.js'),
     }),
   ],
 });

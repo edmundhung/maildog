@@ -1,4 +1,4 @@
-import type { HeadersFunction } from 'remix';
+import type { HeadersFunction, Response } from 'remix';
 import { useRouteData, useMatches, json } from 'remix';
 
 /**
@@ -49,8 +49,8 @@ export function unescapeHtml(markup: string): string {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#x(\d+);/g, (match, hex) => String.fromCharCode(`0x${hex}`))
-    .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec));
+    .replace(/&#x(\d+);/g, (_, hex) => String.fromCharCode(Number(`0x${hex}`)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec));
 }
 
 /**

@@ -1,4 +1,4 @@
-import type { Session } from 'remix';
+import type { Session, Request, Response } from 'remix';
 import { createCookieSessionStorage, redirect } from 'remix';
 import { createToken, getWebFlowAuthorizationUrl } from './github';
 
@@ -22,7 +22,7 @@ const sessionStorage = createCookieSessionStorage({
  * @param {Request} request
  * @returns {Session} current session
  */
-export async function getSession(request: Request): Session {
+export async function getSession(request: Request): Promise<Session> {
   const cookie = request.headers.get('Cookie');
   const session = await sessionStorage.getSession(cookie);
 
@@ -35,7 +35,7 @@ export async function getSession(request: Request): Session {
  * @param request
  * @returns response based on current session
  */
-export async function login(request: Request): Response {
+export async function login(request: Request): Promise<Response> {
   const session = await getSession(request);
 
   if (session.has('accessToken')) {
@@ -55,7 +55,7 @@ export async function login(request: Request): Response {
  * @param request
  * @returns response based on current session
  */
-export async function logout(request: Request): Response {
+export async function logout(request: Request): Promise<Response> {
   const session = await getSession(request);
 
   return redirect('/', {
@@ -74,7 +74,7 @@ export async function logout(request: Request): Response {
  * @param request
  * @returns response based on current session
  */
-export async function callback(request: Request): Response {
+export async function callback(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
