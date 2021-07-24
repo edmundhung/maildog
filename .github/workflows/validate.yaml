@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [opened, synchronize, closed, reopened]
     paths:
-      - '.github/wokrflows/validate.yaml'
+      - '.github/workflows/validate.yaml'
       - 'lib/**'
       - 'bin/**'
       - 'examples/maildog.config.json'
