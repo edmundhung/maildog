@@ -8,7 +8,6 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ExtensionReloader = require('webpack-extension-reloader');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WextManifestWebpackPlugin = require('wext-manifest-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const publicPath = path.join(__dirname, 'public');
@@ -16,22 +15,7 @@ const sourcePath = path.join(__dirname, 'src');
 const destPath = path.join(__dirname, 'dist');
 const nodeEnv = process.env.NODE_ENV || 'development';
 const targetBrowser = process.env.TARGET_BROWSER;
-
-const extensionReloaderPlugin =
-  nodeEnv === 'development'
-    ? new ExtensionReloader({
-        port: 9090,
-        reloadPage: true,
-        entries: {
-          // TODO: reload manifest on update
-          contentScript: 'contentScript',
-          background: 'background',
-          extensionPage: ['popup', 'options'],
-        },
-      })
-    : () => {
-        this.apply = () => {};
-      };
+const outputPath = path.join(destPath, targetBrowser);
 
 const getExtensionFileType = (browser) => {
   if (browser === 'opera') {
@@ -45,6 +29,60 @@ const getExtensionFileType = (browser) => {
   return 'zip';
 };
 
+const plugins = [
+  // Plugin to not generate js bundle for manifest entry
+  new WextManifestWebpackPlugin(),
+  // Generate sourcemaps
+  new webpack.SourceMapDevToolPlugin({ filename: false }),
+  // environmental variables
+  new webpack.EnvironmentPlugin(['NODE_ENV', 'TARGET_BROWSER']),
+  // delete previous build files
+  new CleanWebpackPlugin({
+    cleanOnceBeforeBuildPatterns: [
+      outputPath,
+      `${outputPath}.${getExtensionFileType(targetBrowser)}`,
+    ],
+    cleanStaleWebpackAssets: false,
+    verbose: true,
+  }),
+  new HtmlWebpackPlugin({
+    template: path.join(publicPath, 'popup.html'),
+    inject: 'body',
+    chunks: ['popup'],
+    hash: true,
+    filename: 'popup.html',
+  }),
+  new HtmlWebpackPlugin({
+    template: path.join(publicPath, 'options.html'),
+    inject: 'body',
+    chunks: ['options'],
+    hash: true,
+    filename: 'options.html',
+  }),
+  // write css file(s) to build folder
+  new MiniCssExtractPlugin({ filename: 'css/[name].css' }),
+  // copy static assets
+  new CopyWebpackPlugin({
+    patterns: [{ from: 'public/assets', to: 'assets' }],
+  }),
+];
+
+if (nodeEnv === 'development') {
+  plugins.push(
+    // plugin to enable browser reloading in development mode
+    new ExtensionReloader({
+      port: 9090,
+      reloadPage: true,
+      entries: {
+        // TODO: reload manifest on update
+        contentScript: 'contentScript',
+        background: 'background',
+        extensionPage: ['popup', 'options'],
+      },
+    }),
+  );
+}
+
 module.exports = {
   devtool: false, // https://github.com/webpack/webpack/issues/1194#issuecomment-560382342
 
@@ -57,6 +95,8 @@ module.exports = {
 
   mode: nodeEnv,
 
+  watch: nodeEnv === 'development',
+
   entry: {
     manifest: path.join(sourcePath, 'manifest.json'),
     background: path.join(sourcePath, 'background.ts'),
@@ -66,17 +106,12 @@ module.exports = {
   },
 
   output: {
-    path: path.join(destPath, targetBrowser),
+    path: outputPath,
     filename: 'js/[name].bundle.js',
   },
 
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.json'],
-    alias: {
-      'webextension-polyfill-ts': path.resolve(
-        path.join(__dirname, 'node_modules', 'webextension-polyfill-ts'),
-      ),
-    },
   },
 
   module: {
@@ -98,7 +133,7 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.(sa|sc|c)ss$/,
+        test: /\.css$/,
         use: [
           {
             loader: MiniCssExtractPlugin.loader, // It creates a CSS file per JS file which contains CSS
@@ -130,49 +165,7 @@ module.exports = {
     ],
   },
 
-  plugins: [
-    // Plugin to not generate js bundle for manifest entry
-    new WextManifestWebpackPlugin(),
-    // Generate sourcemaps
-    new webpack.SourceMapDevToolPlugin({ filename: false }),
-    new ForkTsCheckerWebpackPlugin(),
-    // environmental variables
-    new webpack.EnvironmentPlugin(['NODE_ENV', 'TARGET_BROWSER']),
-    // delete previous build files
-    new CleanWebpackPlugin({
-      cleanOnceBeforeBuildPatterns: [
-        path.join(process.cwd(), `dist/${targetBrowser}`),
-        path.join(
-          process.cwd(),
-          `dist/${targetBrowser}.${getExtensionFileType(targetBrowser)}`,
-        ),
-      ],
-      cleanStaleWebpackAssets: false,
-      verbose: true,
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(publicPath, 'popup.html'),
-      inject: 'body',
-      chunks: ['popup'],
-      hash: true,
-      filename: 'popup.html',
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(publicPath, 'options.html'),
-      inject: 'body',
-      chunks: ['options'],
-      hash: true,
-      filename: 'options.html',
-    }),
-    // write css file(s) to build folder
-    new MiniCssExtractPlugin({ filename: 'css/[name].css' }),
-    // copy static assets
-    new CopyWebpackPlugin({
-      patterns: [{ from: 'public/assets', to: 'assets' }],
-    }),
-    // plugin to enable browser reloading in development mode
-    extensionReloaderPlugin,
-  ],
+  plugins,
 
   optimization: {
     minimize: true,
@@ -197,11 +190,10 @@ module.exports = {
             archive: [
               {
                 format: 'zip',
-                source: path.join(destPath, targetBrowser),
-                destination: `${path.join(
-                  destPath,
+                source: outputPath,
+                destination: `${outputPath}.${getExtensionFileType(
                   targetBrowser,
-                )}.${getExtensionFileType(targetBrowser)}`,
+                )}`,
                 options: { zlib: { level: 6 } },
               },
             ],

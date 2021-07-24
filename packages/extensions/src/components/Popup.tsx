@@ -5,49 +5,27 @@ function openWebPage(url: string): Promise<Tabs.Tab> {
   return browser.tabs.create({ url });
 }
 
-const Popup: React.FC = () => {
+function login() {
+  return openWebPage(`${process.env.WEB_URL ?? 'http://localhost:3000'}/login`);
+}
+
+function Popup(): React.ReactElement {
   return (
-    <section id="popup">
-      <h2>WEB-EXTENSION-STARTER</h2>
-      <button
-        id="options__button"
-        type="button"
-        onClick={(): Promise<Tabs.Tab> => {
-          return openWebPage('options.html');
-        }}
-      >
-        Options Page
-      </button>
-      <div className="links__holder">
-        <ul>
-          <li>
-            <button
-              type="button"
-              onClick={(): Promise<Tabs.Tab> => {
-                return openWebPage(
-                  'https://github.com/abhijithvijayan/web-extension-starter',
-                );
-              }}
-            >
-              GitHub
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              onClick={(): Promise<Tabs.Tab> => {
-                return openWebPage(
-                  'https://www.buymeacoffee.com/abhijithvijayan',
-                );
-              }}
-            >
-              Buy Me A Coffee
-            </button>
-          </li>
-        </ul>
-      </div>
+    <section className="flex flex-col w-72 h-96 font-light bg-white text-black dark:bg-black dark:text-white p-4">
+      <header>
+        <h1>maildog</h1>
+      </header>
+      <main className="flex flex-grow items-center">
+        <button
+          type="button"
+          className="border border-white dark:border-black hover:border-black dark:hover:border-white p-2 w-full"
+          onClick={login}
+        >
+          Login with GitHub
+        </button>
+      </main>
     </section>
   );
-};
+}
 
 export default Popup;

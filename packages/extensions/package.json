@@ -1,13 +1,13 @@
 {
-  "name": "maildog-extensions",
+  "name": "@maildog/extensions",
   "version": "0.1.0",
   "description": "Manage your maildog with web extensions",
   "license": "MIT",
   "scripts": {
-    "chrome": "NODE_ENV=production TARGET_BROWSER=chrome webpack",
-    "firefox": "NODE_ENV=production TARGET_BROWSER=firefox webpack",
-    "opera": "NODE_ENV=production TARGET_BROWSER=opera webpack",
-    "build": "npm run chrome & npm run firefox & npm run opera"
+    "chrome": "TARGET_BROWSER=chrome webpack",
+    "firefox": "TARGET_BROWSER=firefox webpack",
+    "opera": "TARGET_BROWSER=opera webpack",
+    "build": "export NODE_ENV=production; npm run chrome & npm run firefox & npm run opera & wait"
   },
   "author": {
     "name": "Edmund Hung",
@@ -18,7 +18,7 @@
     "@babel/runtime": "^7.14.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "webext-base-css": "^1.3.1",
+    "tailwindcss": "^2.2.4",
     "webextension-polyfill-ts": "^0.25.0"
   },
   "devDependencies": {
@@ -34,17 +34,16 @@
     "@types/react": "^17.0.6",
     "@types/react-dom": "^17.0.5",
     "@types/webpack": "^4.41.29",
-    "autoprefixer": "^10.2.5",
+    "autoprefixer": "^10.3.1",
     "babel-loader": "^8.2.2",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^6.4.1",
     "css-loader": "^5.2.5",
     "filemanager-webpack-plugin": "^3.1.1",
-    "fork-ts-checker-webpack-plugin": "^6.2.10",
     "html-webpack-plugin": "^4.5.2",
     "mini-css-extract-plugin": "^1.6.0",
     "optimize-css-assets-webpack-plugin": "^5.0.6",
-    "postcss": "^8.3.0",
+    "postcss": "^8.3.5",
     "postcss-loader": "^4.3.0",
     "resolve-url-loader": "^3.1.3",
     "terser-webpack-plugin": "^4.2.3",
