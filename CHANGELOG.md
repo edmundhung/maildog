@@ -1,3 +1,18 @@
+## [1.1.1](https://github.com/edmundhung/maildog/compare/v1.1.0...v1.1.1) (2021-07-24)
+
+
+### Bug Fixes
+
+* **web:** type-checking for web app ([c30dfab](https://github.com/edmundhung/maildog/commit/c30dfab783045252d39b4aff450b8a9ae530893f))
+
+
+### Features
+
+* **web:** implement api route with session api as example ([86814dd](https://github.com/edmundhung/maildog/commit/86814dd8e6005cbec57076e50cff01216dcbbecd))
+* **web:** implement github oauth web application flow with installation support ([9688226](https://github.com/edmundhung/maildog/commit/9688226db6b9530aff84671a8723a6096e3ae01f))
+* **web:** prepare a default homepage for web authentication flow ([cbe752d](https://github.com/edmundhung/maildog/commit/cbe752d6304d9af2ae77b28d81e897139d8de689))
+* **web:** the website should be mobile friendly ([e8c3eed](https://github.com/edmundhung/maildog/commit/e8c3eedf397e431cd75756cbb398ec499d0fb18c))
+
 # [1.1.0](https://github.com/edmundhung/maildog/compare/v1.0.1...v1.1.0) (2021-07-15)
 
 
