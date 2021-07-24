@@ -54,7 +54,7 @@
     }
   },
   "lint-staged": {
-    "*.{ts,js,json,md}": "prettier --write"
+    "*.{ts,js,json,md,tsx,css}": "prettier --write"
   },
   "dependencies": {
     "@aws-cdk/aws-cloudwatch": "^1.108.1",

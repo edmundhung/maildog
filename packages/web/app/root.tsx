@@ -6,15 +6,16 @@ import stylesUrl from './styles/global.css';
 
 export let meta: MetaFunction = () => {
   return {
-    title: "maildog",
-    description: "Hosting your own email forwarding service on AWS and manage it with Github Actions",
-    author: "Edmund Hung",
-    keywords: "aws,email,github",
+    title: 'maildog',
+    description:
+      'Hosting your own email forwarding service on AWS and manage it with Github Actions',
+    author: 'Edmund Hung',
+    keywords: 'aws,email,github',
   };
 };
 
 export let links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: stylesUrl }];
+  return [{ rel: 'stylesheet', href: stylesUrl }];
 };
 
 function Document({ children }: { children: React.ReactNode }) {
@@ -30,7 +31,7 @@ function Document({ children }: { children: React.ReactNode }) {
         {children}
 
         <Scripts />
-        {process.env.NODE_ENV === "development" && <LiveReload />}
+        {process.env.NODE_ENV === 'development' && <LiveReload />}
       </body>
     </html>
   );
