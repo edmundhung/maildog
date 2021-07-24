@@ -9,9 +9,15 @@ module.exports = {
         preset: 'angular', // default
         releaseRules: [
           // Explained on https://github.com/semantic-release/commit-analyzer#releaserules
-          // Mark all web & extensions as `patch` until official release
-          { scope: 'web', release: 'patch' },
-          { scope: 'extensions', release: 'patch' },
+          // Mark all chagnes with scope `web` & `extensions` as a patch until official release
+          { scope: 'web', release: false },
+          { scope: 'extensions', release: false },
+          { type: 'feat', scope: 'web', release: 'patch' },
+          { type: 'fix', scope: 'web', release: 'patch' },
+          { type: 'perf', scope: 'web', release: 'patch' },
+          { type: 'feat', scope: 'extensions', release: 'patch' },
+          { type: 'fix', scope: 'extensions', release: 'patch' },
+          { type: 'perf', scope: 'extensions', release: 'patch' },
         ],
       },
     ],
