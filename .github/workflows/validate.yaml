@@ -3,6 +3,8 @@ on:
   pull_request:
     types: [opened, synchronize, closed, reopened]
     paths-ignore:
+      - 'packages/web/**'
+      - 'packages/extensions/**'
       - 'docs/**'
       - README.md
     branches:
