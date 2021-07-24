@@ -2,9 +2,15 @@ name: Validate Changes
 on:
   pull_request:
     types: [opened, synchronize, closed, reopened]
-    paths-ignore:
-      - 'docs/**'
-      - README.md
+    paths:
+      - '.github/workflows/validate.yaml'
+      - 'lib/**'
+      - 'bin/**'
+      - 'examples/maildog.config.json'
+      - 'pacakge.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'cdk.json'
     branches:
       - main
 

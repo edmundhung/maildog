@@ -3,7 +3,18 @@
 module.exports = {
   branches: ['main'],
   plugins: [
-    '@semantic-release/commit-analyzer',
+    [
+      '@semantic-release/commit-analyzer',
+      {
+        preset: 'angular', // default
+        releaseRules: [
+          // Explained on https://github.com/semantic-release/commit-analyzer#releaserules
+          // Mark all web & extensions as `patch` until official release
+          { scope: 'web', release: 'patch' },
+          { scope: 'extensions', release: 'patch' },
+        ],
+      },
+    ],
     '@semantic-release/release-notes-generator',
     '@semantic-release/changelog',
     [
