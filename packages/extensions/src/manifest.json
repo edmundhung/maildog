@@ -44,22 +44,8 @@
     "__firefox__browser_style": false
   },
 
-  "__chrome|opera__options_page": "options.html",
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true,
-    "__chrome__chrome_style": false
-  },
-
   "background": {
     "scripts": ["js/background.bundle.js"],
     "__chrome|opera__persistent": false
-  },
-
-  "content_scripts": [
-    {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["js/contentScript.bundle.js"]
-    }
-  ]
+  }
 }
