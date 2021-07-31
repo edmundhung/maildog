@@ -52,13 +52,6 @@ const plugins = [
     hash: true,
     filename: 'popup.html',
   }),
-  new HtmlWebpackPlugin({
-    template: path.join(publicPath, 'options.html'),
-    inject: 'body',
-    chunks: ['options'],
-    hash: true,
-    filename: 'options.html',
-  }),
   // write css file(s) to build folder
   new MiniCssExtractPlugin({ filename: 'css/[name].css' }),
   // copy static assets
@@ -75,9 +68,8 @@ if (nodeEnv === 'development') {
       reloadPage: true,
       entries: {
         // TODO: reload manifest on update
-        contentScript: 'contentScript',
         background: 'background',
-        extensionPage: ['popup', 'options'],
+        extensionPage: ['popup'],
       },
     }),
   );
@@ -100,9 +92,7 @@ module.exports = {
   entry: {
     manifest: path.join(sourcePath, 'manifest.json'),
     background: path.join(sourcePath, 'background.ts'),
-    contentScript: path.join(sourcePath, 'contentScript.ts'),
     popup: path.join(sourcePath, 'popup.tsx'),
-    options: path.join(sourcePath, 'options.tsx'),
   },
 
   output: {
