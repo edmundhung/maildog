@@ -9,7 +9,7 @@
     "48": "assets/icons/favicon-48.png",
     "128": "assets/icons/favicon-128.png"
   },
-  "description": "Hosting your own email forwarding service on AWS and manage it with Github Actions",
+  "description": "Manage your maildog on the browser, anytime.",
   "homepage_url": "https://maildog.dev",
   "short_name": "maildog",
 
@@ -39,7 +39,7 @@
       "48": "assets/icons/favicon-48.png",
       "128": "assets/icons/favicon-128.png"
     },
-    "default_title": "tiny title",
+    "default_title": "maildog",
     "__chrome|opera__chrome_style": false,
     "__firefox__browser_style": false
   },
