@@ -92,7 +92,7 @@ module.exports = {
   entry: {
     manifest: path.join(sourcePath, 'manifest.json'),
     background: path.join(sourcePath, 'background.ts'),
-    popup: path.join(sourcePath, 'popup.tsx'),
+    popup: path.join(sourcePath, 'popup', 'index.tsx'),
   },
 
   output: {
