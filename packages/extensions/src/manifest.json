@@ -20,6 +20,7 @@
     "http://localhost:3000/*"
   ],
 
+  "incognito": "split",
   "content_security_policy": "script-src 'self'; object-src 'self'",
 
   "__chrome|firefox__author": "edmundhung",
