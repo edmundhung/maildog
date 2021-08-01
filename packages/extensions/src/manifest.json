@@ -13,7 +13,12 @@
   "homepage_url": "https://maildog.dev",
   "short_name": "maildog",
 
-  "permissions": ["activeTab", "storage", "http://*/*", "https://*/*"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "https://maildog.dev/*",
+    "http://localhost:3000/*"
+  ],
 
   "content_security_policy": "script-src 'self'; object-src 'self'",
 

@@ -1,11 +1,14 @@
 module.exports = {
   purge: ['./public/*.html', './src/**/*.ts', './src/**/*.tsx'],
-  darkMode: 'media',
-  theme: {},
-  variants: {
+  darkMode: false,
+  theme: {
     extend: {
-      borderColor: ['dark'],
+      colors: {
+        primary: '#537780',
+        secondary: '#fffcca',
+      },
     },
   },
+  variants: {},
   plugins: [],
 };
