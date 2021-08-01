@@ -1,6 +1,13 @@
 import { config, decrypt, readMessage } from 'openpgp/lightweight';
 import { browser } from 'webextension-polyfill-ts';
-import { Status, Config, GET_STATUS_EVENT } from './types';
+import {
+  Status,
+  Config,
+  GET_STATUS_EVENT,
+  SELECT_REPOSITORY_EVENT,
+  SAVE_PASSPHRASE_EVENT,
+  RESET_EVENT,
+} from './types';
 
 interface Context {
   repository: string | null;
@@ -8,7 +15,11 @@ interface Context {
   config: any;
 }
 
-type Event = GET_STATUS_EVENT;
+type Event =
+  | GET_STATUS_EVENT
+  | SELECT_REPOSITORY_EVENT
+  | SAVE_PASSPHRASE_EVENT
+  | RESET_EVENT;
 
 async function request<T>(path: string): T {
   const response = await fetch(
@@ -66,6 +77,72 @@ async function getStatus(
   }
 }
 
+async function selectRepository(
+  context: Context,
+  { repo }: SELECT_REPOSITORY_EVENT,
+): Promise<void> {
+  console.log('selectRepository', JSON.stringify(context));
+  if (repo === context.repository) {
+    return;
+  }
+
+  context.repository = repo;
+  context.passpharse = null;
+  context.config = null;
+}
+
+async function savePassphase(
+  context: Context,
+  { passphrase }: SAVE_PASSPHRASE_EVENT,
+): Promise<void> {
+  console.log('savePassphase', JSON.stringify(context));
+  if (context.repository === null) {
+    return;
+  }
+
+  context.passpharse = passphrase;
+
+  try {
+    const [owner, repo] = context.repository.split('/');
+    const searchParams = new URLSearchParams([
+      ['owner', owner],
+      ['repo', repo],
+    ]);
+    const file = await request<{ encoding: string; content: string }>(
+      `/api/config?${searchParams.toString()}`,
+    );
+
+    if (file.encoding !== 'base64') {
+      throw new Error(`Unexpected file encoding: ${file.encoding} returned`);
+    }
+
+    const encryptedMessage = await readMessage({
+      armoredMessage: atob(file.content),
+    });
+    const { data } = await decrypt({
+      message: encryptedMessage,
+      passwords: [context.passpharse],
+    });
+    const config = JSON.parse(data);
+
+    context.config = config;
+  } catch (error) {
+    console.log('[Error] Failed to retrieve config from Github', error);
+
+    throw error;
+  }
+}
+
+async function reset(context): Promise<void> {
+  console.log('reset', JSON.stringify(context));
+
+  Object.assign(context, {
+    repository: null,
+    passpharse: null,
+    config: null,
+  });
+}
+
 function main() {
   let context: Context = {
     repository: null,
@@ -77,6 +154,12 @@ function main() {
     switch (event.type) {
       case 'GET_STATUS':
         return getStatus(context, event);
+      case 'SELECT_REPOSITORY':
+        return selectRepository(context, event);
+      case 'SAVE_PASSPHRASE':
+        return savePassphase(context, event);
+      case 'RESET':
+        return reset(context, event);
       default:
         return;
     }
