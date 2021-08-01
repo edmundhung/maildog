@@ -20,8 +20,24 @@ export const apiHeaders: HeadersFunction = ({
  * Helpers for generating a 401 JSON response
  * @returns {Response} 401 Response
  */
+export function badRequest(): Response {
+  return json({ error: { message: 'Bad Request' } }, 400);
+}
+
+/**
+ * Helpers for generating a 401 JSON response
+ * @returns {Response} 401 Response
+ */
 export function unauthorized(): Response {
   return json({ error: { message: 'Unauthorized' } }, 401);
+}
+
+/**
+ * Helpers for generating a 404 JSON response
+ * @returns {Response} 404 Response
+ */
+export function notFound(): Response {
+  return json({ error: { message: 'Not Found' } }, 404);
 }
 
 /**
