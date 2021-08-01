@@ -84,3 +84,44 @@ export async function listInstalledRepositories(
 
   return repos;
 }
+
+/**
+ * Lookup the encrypted config file content from the specific repository
+ * @param token {string} user access token
+ * @param owner {string}
+ * @param repo {string}
+ * @param ref {string} The name of the commit/branch/tag
+ * @returns {{ encoding: string; content: string }} config file details
+ */
+export async function getEncrypedConfig(
+  token: string,
+  owner: string,
+  repo: string,
+  ref?: string,
+): { encoding: string; content: string } | null {
+  const octokit = await getUserOctokit(token);
+
+  try {
+    const config = await octokit.request(
+      'GET /repos/{owner}/{repo}/contents/{path}',
+      {
+        owner,
+        repo,
+        ref,
+        path: 'maildog.config.json.asc',
+      },
+    );
+
+    return {
+      encoding: config.data.encoding,
+      content: config.data.content,
+    };
+  } catch (e) {
+    console.log(
+      `[Error] Fail to lookup config from ${owner}/${repo} with ref ${
+        ref ?? 'default'
+      }`,
+    );
+    return null;
+  }
+}
