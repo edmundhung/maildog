@@ -51,6 +51,6 @@
 
   "background": {
     "scripts": ["js/background.bundle.js"],
-    "__chrome|opera__persistent": false
+    "__chrome|opera__persistent": true
   }
 }
