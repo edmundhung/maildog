@@ -1,5 +1,5 @@
 import { config, decrypt, readMessage } from 'openpgp/lightweight';
-import { browser } from 'webextension-polyfill-ts';
+import { browser, Tabs } from 'webextension-polyfill-ts';
 import {
   Status,
   Config,
@@ -10,6 +10,7 @@ import {
 } from './types';
 
 interface Context {
+  activeTabHost: string | null;
   repository: string | null;
   passpharse: string | null;
   config: any;
@@ -51,7 +52,7 @@ async function getStatus(
     }
 
     let configByDomain: Record<string, Config> | null = null;
-    let emails: string[] = [];
+    const emails = lookupEmails(context.config, context.activeTabHost);
 
     if (context.config) {
       configByDomain = Object.fromEntries(
@@ -143,14 +144,65 @@ async function reset(context): Promise<void> {
   });
 }
 
+async function updateActiveTab(context: Context, tab: Tabs.Tab): Promise<void> {
+  if (!tab.url) {
+    return;
+  }
+
+  const url = new URL(tab.url);
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+
+  context.activeTabHost = url.host;
+
+  const emails = lookupEmails(context.config, context.activeTabHost);
+  await browser.browserAction.setBadgeText({
+    text: emails.length > 0 ? `${emails.length}` : '',
+  });
+}
+
+function lookupEmails(config: any, host: string | null): string[] {
+  if (config === null || host === null) {
+    return [];
+  }
+
+  return Object.entries(config.domains).flatMap(([domain, config]) =>
+    Object.entries(config.alias)
+      .filter(([_, rule]) => (rule.website as string).endsWith(host))
+      .map(([prefix]) => `${prefix}@${domain}`),
+  );
+}
+
 function main() {
+  let activeTabId: number | null = null;
   let context: Context = {
+    activeTabHost: null,
     repository: null,
     passpharse: null,
     config: null,
   };
 
-  browser.runtime.onMessage.addListener((event: Event, sender) => {
+  browser.browserAction.setBadgeBackgroundColor({ color: '#537780' });
+
+  browser.tabs.onActivated.addListener(async (activeInfo) => {
+    activeTabId = activeInfo.tabId;
+
+    const tab = await browser.tabs.get(activeInfo.tabId);
+
+    await updateActiveTab(context, tab);
+  });
+
+  browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (activeTabId !== tabId) {
+      return;
+    }
+
+    await (context, tab);
+  });
+
+  browser.runtime.onMessage.addListener((event: Event) => {
     switch (event.type) {
       case 'GET_STATUS':
         return getStatus(context, event);
