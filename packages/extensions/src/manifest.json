@@ -14,7 +14,7 @@
   "short_name": "maildog",
 
   "permissions": [
-    "activeTab",
+    "tabs",
     "storage",
     "https://maildog.dev/*",
     "http://localhost:3000/*"
