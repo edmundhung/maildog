@@ -51,23 +51,11 @@ async function getStatus(
       context.repository = options[0];
     }
 
-    let configByDomain: Record<string, Config> | null = null;
-    const emails = lookupEmails(context.config, context.activeTabHost);
-
-    if (context.config) {
-      configByDomain = Object.fromEntries(
-        Object.keys(context.config.domains).map<[string, Config]>((domain) => [
-          domain,
-          { recipents: [] },
-        ]),
-      );
-    }
-
     return {
       repository: context.repository,
+      configByDomain: deriveConfigByDomain(context.config),
+      emails: lookupEmails(context.config, context.activeTabHost),
       options,
-      configByDomain,
-      emails,
     };
   } catch (e) {
     if (e.message === 'Unauthorized') {
@@ -158,9 +146,43 @@ async function updateActiveTab(context: Context, tab: Tabs.Tab): Promise<void> {
   context.activeTabHost = url.host;
 
   const emails = lookupEmails(context.config, context.activeTabHost);
+  const configByDomain = deriveConfigByDomain(context.config);
+
   await browser.browserAction.setBadgeText({
     text: emails.length > 0 ? `${emails.length}` : '',
   });
+
+  await browser.contextMenus.removeAll();
+
+  browser.contextMenus.create({
+    id: 'maildog',
+    title: 'maildog',
+    contexts: ['all'],
+  });
+
+  for (const domain of Object.keys(configByDomain)) {
+    browser.contextMenus.create({
+      id: `maildog-${domain}`,
+      parentId: 'maildog',
+      title: domain,
+    });
+
+    for (const email of emails.filter((email) =>
+      email.endsWith(`@${domain}`),
+    )) {
+      browser.contextMenus.create({
+        id: `maildog-${domain}-${email}`,
+        parentId: `maildog-${domain}`,
+        title: email,
+      });
+    }
+
+    browser.contextMenus.create({
+      id: `maildog-${domain}-new`,
+      parentId: `maildog-${domain}`,
+      title: 'Generate email address',
+    });
+  }
 }
 
 function lookupEmails(config: any, host: string | null): string[] {
@@ -169,9 +191,22 @@ function lookupEmails(config: any, host: string | null): string[] {
   }
 
   return Object.entries(config.domains).flatMap(([domain, config]) =>
-    Object.entries(config.alias)
+    Object.entries(config.alias ?? {})
       .filter(([_, rule]) => (rule.website as string).endsWith(host))
       .map(([prefix]) => `${prefix}@${domain}`),
+  );
+}
+
+function deriveConfigByDomain(config: any): Record<string, Config> | null {
+  if (config === null) {
+    return null;
+  }
+
+  return Object.fromEntries(
+    Object.keys(config.domains).map<[string, Config]>((domain) => [
+      domain,
+      { recipents: [] },
+    ]),
   );
 }
 
