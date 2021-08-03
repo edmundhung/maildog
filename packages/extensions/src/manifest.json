@@ -16,6 +16,8 @@
   "permissions": [
     "tabs",
     "storage",
+    "contextMenus",
+    "clipboardWrite",
     "https://maildog.dev/*",
     "http://localhost:3000/*"
   ],
