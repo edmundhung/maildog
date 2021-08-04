@@ -120,6 +120,8 @@ async function savePassphase(
 
     throw error;
   }
+
+  await refreshData(context);
 }
 
 async function reset(context): Promise<void> {
@@ -145,13 +147,24 @@ async function updateActiveTab(context: Context, tab: Tabs.Tab): Promise<void> {
 
   context.activeTabHost = url.host;
 
+  await refreshData(context);
+}
+
+async function refreshData(context: Context): Promise<void> {
+  const domains = Object.keys(context.config.domains);
   const emails = lookupEmails(context.config, context.activeTabHost);
-  const configByDomain = deriveConfigByDomain(context.config);
+  const emailsByDomain = getEmailsByDomain(domains, emails);
 
   await browser.browserAction.setBadgeText({
     text: emails.length > 0 ? `${emails.length}` : '',
   });
 
+  await updateContextMenu(emailsByDomain);
+}
+
+async function updateContextMenu(
+  emailsByDomain: Record<string, string[]>,
+): Promise<void> {
   await browser.contextMenus.removeAll();
 
   browser.contextMenus.create({
@@ -160,16 +173,14 @@ async function updateActiveTab(context: Context, tab: Tabs.Tab): Promise<void> {
     contexts: ['all'],
   });
 
-  for (const domain of Object.keys(configByDomain)) {
+  for (const [domain, emails] of Object.entries(emailsByDomain)) {
     browser.contextMenus.create({
       id: `maildog-${domain}`,
       parentId: 'maildog',
       title: domain,
     });
 
-    for (const email of emails.filter((email) =>
-      email.endsWith(`@${domain}`),
-    )) {
+    for (const email of emails) {
       browser.contextMenus.create({
         id: `maildog-${domain}-${email}`,
         parentId: `maildog-${domain}`,
@@ -195,6 +206,18 @@ function lookupEmails(config: any, host: string | null): string[] {
       .filter(([_, rule]) => (rule.website as string).endsWith(host))
       .map(([prefix]) => `${prefix}@${domain}`),
   );
+}
+
+function getEmailsByDomain(domains: string[], emails: string[]) {
+  return emails.reduce((result, email) => {
+    const domain = email.slice(email.indexOf('@') + 1);
+    const emails = result[domain] ?? [];
+
+    emails.push(email);
+    result[domain] = emails;
+
+    return result;
+  }, Object.fromEntries(domains.map<[string, string[]]>((domain) => [domain, []])));
 }
 
 function deriveConfigByDomain(config: any): Record<string, Config> | null {
