@@ -167,18 +167,33 @@ async function updateContextMenu(
 ): Promise<void> {
   await browser.contextMenus.removeAll();
 
-  browser.contextMenus.create({
-    id: 'maildog',
-    title: 'maildog',
-    contexts: ['all'],
-  });
+  const list = Object.entries(emailsByDomain);
 
-  for (const [domain, emails] of Object.entries(emailsByDomain)) {
+  if (list.length === 0) {
+    return;
+  }
+
+  if (list.length > 1) {
     browser.contextMenus.create({
-      id: `maildog-${domain}`,
-      parentId: 'maildog',
-      title: domain,
+      id: 'maildog',
+      title: 'maildog',
+      contexts: ['all'],
     });
+  }
+
+  for (const [domain, emails] of list) {
+    if (list.length > 1) {
+      browser.contextMenus.create({
+        id: `maildog-${domain}`,
+        parentId: 'maildog',
+        title: domain,
+      });
+    } else {
+      browser.contextMenus.create({
+        id: `maildog-${domain}`,
+        title: `maildog (${domain})`,
+      });
+    }
 
     for (const email of emails) {
       browser.contextMenus.create({
