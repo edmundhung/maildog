@@ -1,28 +1,29 @@
+import { MachineConfig, createMachine, interpret, assign, State } from 'xstate';
 import { config, decrypt, readMessage } from 'openpgp/lightweight';
 import { browser, Tabs } from 'webextension-polyfill-ts';
 import {
-  Status,
+  Session,
   Config,
-  GET_STATUS_EVENT,
-  SELECT_REPOSITORY_EVENT,
-  SAVE_PASSPHRASE_EVENT,
-  RESET_EVENT,
+  GET_SESSION_EVENT,
+  LOGIN_EVENT,
+  LOGOUT_EVENT,
+  UNLOCK_EVENT,
 } from './types';
 
 interface Context {
-  activeTabHost: string | null;
+  activeTabId: number | null;
+  activeTabUrl: string | null;
   repository: string | null;
-  passpharse: string | null;
-  config: any;
+  options: string[];
+  passphrase: string | null;
+  config: any | null;
 }
 
-type Event =
-  | GET_STATUS_EVENT
-  | SELECT_REPOSITORY_EVENT
-  | SAVE_PASSPHRASE_EVENT
-  | RESET_EVENT;
+type Message = GET_SESSION_EVENT | LOGIN_EVENT | LOGOUT_EVENT | UNLOCK_EVENT;
 
-async function request<T>(path: string): T {
+type Event = LOGIN_EVENT | LOGOUT_EVENT | UNLOCK_EVENT;
+
+async function request<T>(path: string): Promise<T> {
   const response = await fetch(
     `${process.env.WEB_URL ?? 'http://localhost:3000'}${path}`,
   );
@@ -36,130 +37,76 @@ async function request<T>(path: string): T {
   return data;
 }
 
-async function getStatus(
-  context: Context,
-  event: GET_STATUS_EVENT,
-): Promise<Status | null> {
-  console.log('getStatus', JSON.stringify(context));
+async function getOptions(): Promise<string[]> {
+  const { repos } = await request<{ repos: string[] }>('/api/session');
 
-  try {
-    const { repos: options } = await request<{ repos: string[] }>(
-      '/api/session',
-    );
-
-    if (context.repository === null) {
-      context.repository = options[0];
-    }
-
-    return {
-      repository: context.repository,
-      configByDomain: deriveConfigByDomain(context.config),
-      emails: lookupEmails(context.config, context.activeTabHost),
-      options,
-    };
-  } catch (e) {
-    if (e.message === 'Unauthorized') {
-      return null;
-    }
-
-    throw e;
-  }
+  return repos;
 }
 
-async function selectRepository(
-  context: Context,
-  { repo }: SELECT_REPOSITORY_EVENT,
-): Promise<void> {
-  console.log('selectRepository', JSON.stringify(context));
-  if (repo === context.repository) {
-    return;
+async function getConfig(repository: string, passphrase: string): Promise<any> {
+  const [owner, repo] = repository.split('/');
+  const searchParams = new URLSearchParams([
+    ['owner', owner],
+    ['repo', repo],
+  ]);
+  const file = await request<{ encoding: string; content: string }>(
+    `/api/config?${searchParams.toString()}`,
+  );
+
+  if (file.encoding !== 'base64') {
+    throw new Error(`Unexpected file encoding: ${file.encoding} returned`);
   }
 
-  context.repository = repo;
-  context.passpharse = null;
-  context.config = null;
+  const encryptedMessage = await readMessage({
+    armoredMessage: atob(file.content),
+  });
+  const { data } = await decrypt({
+    message: encryptedMessage,
+    passwords: [passphrase],
+  });
+
+  return JSON.parse(data);
 }
 
-async function savePassphase(
-  context: Context,
-  { passphrase }: SAVE_PASSPHRASE_EVENT,
-): Promise<void> {
-  console.log('savePassphase', JSON.stringify(context));
-  if (context.repository === null) {
-    return;
-  }
+async function openPageInBackground(path: string): Promise<Tabs.Tab> {
+  const backgroundTab = await browser.tabs.create({
+    url: `${process.env.WEB_URL ?? 'http://localhost:3000'}${path}`,
+    active: false,
+  });
 
-  context.passpharse = passphrase;
+  return new Promise((resolve) => {
+    function listener(
+      tabId: number,
+      changeInfo: Tabs.OnUpdatedChangeInfoType,
+      tab: Tabs.Tab,
+    ): void {
+      if (tabId !== backgroundTab.id || changeInfo.status !== 'complete') {
+        return;
+      }
 
-  try {
-    const [owner, repo] = context.repository.split('/');
-    const searchParams = new URLSearchParams([
-      ['owner', owner],
-      ['repo', repo],
-    ]);
-    const file = await request<{ encoding: string; content: string }>(
-      `/api/config?${searchParams.toString()}`,
-    );
-
-    if (file.encoding !== 'base64') {
-      throw new Error(`Unexpected file encoding: ${file.encoding} returned`);
+      resolve(tab);
+      browser.tabs.onUpdated.removeListener(listener);
     }
 
-    const encryptedMessage = await readMessage({
-      armoredMessage: atob(file.content),
-    });
-    const { data } = await decrypt({
-      message: encryptedMessage,
-      passwords: [context.passpharse],
-    });
-    const config = JSON.parse(data);
-
-    context.config = config;
-  } catch (error) {
-    console.log('[Error] Failed to retrieve config from Github', error);
-
-    throw error;
-  }
-
-  await refreshData(context);
-}
-
-async function reset(context): Promise<void> {
-  console.log('reset', JSON.stringify(context));
-
-  Object.assign(context, {
-    repository: null,
-    passpharse: null,
-    config: null,
+    browser.tabs.onUpdated.addListener(listener);
   });
 }
 
-async function updateActiveTab(context: Context, tab: Tabs.Tab): Promise<void> {
+async function login(): Promise<void> {
+  const tab = await openPageInBackground('/login');
+
   if (!tab.url) {
+    browser.tabs.update(tab.id, { active: true });
     return;
   }
 
-  const url = new URL(tab.url);
-
-  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    return;
-  }
-
-  context.activeTabHost = url.host;
-
-  await refreshData(context);
+  browser.tabs.remove(tab.id);
 }
 
-async function refreshData(context: Context): Promise<void> {
-  const domains = Object.keys(context.config.domains);
-  const emails = lookupEmails(context.config, context.activeTabHost);
-  const emailsByDomain = getEmailsByDomain(domains, emails);
+async function logout(): Promise<void> {
+  const tab = await openPageInBackground('/logout');
 
-  await browser.browserAction.setBadgeText({
-    text: emails.length > 0 ? `${emails.length}` : '',
-  });
-
-  await updateContextMenu(emailsByDomain);
+  browser.tabs.remove(tab.id);
 }
 
 async function updateContextMenu(
@@ -211,14 +158,151 @@ async function updateContextMenu(
   }
 }
 
-function lookupEmails(config: any, host: string | null): string[] {
-  if (config === null || host === null) {
+const machineConfig: MachineConfig<Context, any, Event> = {
+  id: 'maildog',
+  context: {
+    activeTabId: null,
+    activeTabUrl: null,
+    repository: null,
+    options: [],
+    passphrase: null,
+    config: null,
+  },
+  on: {
+    ACTIVATE_TAB: {
+      actions: assign({
+        activeTabId: (context, event) => event.tabId,
+        activeTabUrl: (context, event) => event.tabUrl,
+      }),
+    },
+    UPDATE_TAB: {
+      actions: assign({
+        activeTabUrl: (context, event) =>
+          event.tabId === context.activeTabId
+            ? event.tabUrl
+            : context.activeTabUrl,
+      }),
+    },
+  },
+  initial: 'initializing',
+  states: {
+    unauthenticated: {
+      on: { LOGIN: 'loggingIn' },
+    },
+    loggingIn: {
+      invoke: {
+        id: 'logging-in',
+        src: () => login(),
+        onDone: {
+          target: 'initializing',
+        },
+        onError: 'unauthenticated',
+      },
+    },
+    initializing: {
+      invoke: {
+        id: 'authenticate',
+        src: () => getOptions(),
+        onDone: {
+          target: 'authenticated',
+          actions: assign({
+            options: (_, event) => event.data ?? [],
+          }),
+        },
+        onError: 'unauthenticated',
+      },
+    },
+    loggingOut: {
+      invoke: {
+        id: 'logging-out',
+        src: () => logout(),
+        onDone: 'unauthenticated',
+        onError: 'unauthenticated',
+      },
+    },
+    authenticated: {
+      on: {
+        LOGOUT: {
+          target: 'loggingOut',
+          actions: assign({
+            repository: () => null,
+            options: () => [],
+            passphrase: () => null,
+            config: () => null,
+          }),
+        },
+      },
+      initial: 'locked',
+      states: {
+        locked: {
+          on: {
+            UNLOCK: {
+              target: 'unlocking',
+              actions: assign({
+                repository: (_, event) => event.repository,
+                passphrase: (_, event) => event.passphrase,
+                config: () => null,
+              }),
+            },
+          },
+        },
+        unlocked: {
+          on: {
+            UNLOCK: {
+              target: 'unlocking',
+              actions: assign({
+                repository: (_, event) => event.repository,
+                passphrase: (_, event) => event.passphrase,
+                config: () => null,
+              }),
+            },
+          },
+        },
+        unlocking: {
+          invoke: {
+            id: 'unlock',
+            src: (context) => getConfig(context.repository, context.passphrase),
+            onDone: {
+              target: 'unlocked',
+              actions: assign({
+                config: (context, event) => event.data,
+              }),
+            },
+            onError: {
+              target: 'locked',
+              actions: assign({
+                repository: () => null,
+                passphrase: () => null,
+              }),
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+const maildogMachine = createMachine(machineConfig);
+
+function getSession(context: Context): Session {
+  return {
+    repository: context.repository,
+    configByDomain: deriveConfigByDomain(context.config),
+    emails: lookupEmails(context.config, context.activeTabUrl),
+    options: context.options,
+  };
+}
+
+function lookupEmails(config: any, currentUrl: string | null): string[] {
+  if (config === null || currentUrl === null) {
     return [];
   }
 
+  const url = new URL(currentUrl);
+
   return Object.entries(config.domains).flatMap(([domain, config]) =>
     Object.entries(config.alias ?? {})
-      .filter(([_, rule]) => (rule.website as string).endsWith(host))
+      .filter(([_, rule]) => (rule.website as string).endsWith(url.host))
       .map(([prefix]) => `${prefix}@${domain}`),
   );
 }
@@ -249,45 +333,95 @@ function deriveConfigByDomain(config: any): Record<string, Config> | null {
 }
 
 function main() {
-  let activeTabId: number | null = null;
-  let context: Context = {
-    activeTabHost: null,
-    repository: null,
-    passpharse: null,
-    config: null,
-  };
+  const service = interpret(maildogMachine).start();
 
   browser.browserAction.setBadgeBackgroundColor({ color: '#537780' });
 
   browser.tabs.onActivated.addListener(async (activeInfo) => {
-    activeTabId = activeInfo.tabId;
-
     const tab = await browser.tabs.get(activeInfo.tabId);
 
-    await updateActiveTab(context, tab);
+    service.send({
+      type: 'ACTIVATE_TAB',
+      tabId: activeInfo.tabId,
+      tabUrl: tab.url,
+    });
   });
 
   browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (activeTabId !== tabId) {
+    service.send({
+      type: 'UPDATE_TAB',
+      tabId,
+      tabUrl: tab.url,
+    });
+  });
+
+  browser.runtime.onMessage.addListener((message: Message) => {
+    return new Promise((resolve, reject) => {
+      switch (message.type) {
+        case 'GET_SESSION':
+          if (service.state.matches('authenticated')) {
+            resolve(getSession(service.state.context));
+          } else {
+            resolve(null);
+          }
+          break;
+        case 'UNLOCK':
+          const handleUnlock = (state: State<Context>) => {
+            if (state.matches('authenticated.unlocked')) {
+              service.off(handleUnlock);
+              resolve();
+            }
+          };
+
+          service.onTransition(handleUnlock).send({
+            type: 'UNLOCK',
+            repository: message.repository,
+            passphrase: message.passphrase,
+          });
+          break;
+        case 'LOGIN':
+          const handleLogin = (state: State<Context>) => {
+            if (state.matches('authenticated')) {
+              service.off(handleLogin);
+              resolve();
+            }
+          };
+
+          service.onTransition(handleLogin).send('LOGIN');
+          break;
+        case 'LOGOUT':
+          const handleLogout = (state: State<Context>) => {
+            if (state.matches('unauthenticated')) {
+              service.off(handleLogout);
+              resolve();
+            }
+          };
+
+          service.onTransition(handleLogout).send('LOGOUT');
+          break;
+        default:
+          reject(
+            new Error(`Unknown message received: ${JSON.stringify(message)}`),
+          );
+          break;
+      }
+    });
+  });
+
+  service.onChange(async (context) => {
+    if (context.config === null) {
       return;
     }
 
-    await (context, tab);
-  });
+    const domains = Object.keys(context.config.domains);
+    const emails = lookupEmails(context.config, context.activeTabUrl);
+    const emailsByDomain = getEmailsByDomain(domains, emails);
 
-  browser.runtime.onMessage.addListener((event: Event) => {
-    switch (event.type) {
-      case 'GET_STATUS':
-        return getStatus(context, event);
-      case 'SELECT_REPOSITORY':
-        return selectRepository(context, event);
-      case 'SAVE_PASSPHRASE':
-        return savePassphase(context, event);
-      case 'RESET':
-        return reset(context, event);
-      default:
-        return;
-    }
+    await browser.browserAction.setBadgeText({
+      text: emails.length > 0 ? `${emails.length}` : '',
+    });
+
+    await updateContextMenu(emailsByDomain);
   });
 }
 

@@ -2,27 +2,27 @@ export interface Config {
   recipents: string[];
 }
 
-export interface Status {
+export interface Session {
   repository: string;
   options: string[];
   configByDomain: Record<string, Config> | null;
   emails: string[];
 }
 
-export interface GET_STATUS_EVENT {
-  type: 'GET_STATUS';
+export interface GET_SESSION_EVENT {
+  type: 'GET_SESSION';
 }
 
-export interface SELECT_REPOSITORY_EVENT {
-  type: 'SELECT_REPOSITORY';
-  repo: string;
+export interface LOGIN_EVENT {
+  type: 'LOGIN';
 }
 
-export interface SAVE_PASSPHRASE_EVENT {
-  type: 'SAVE_PASSPHRASE';
+export interface LOGOUT_EVENT {
+  type: 'LOGOUT';
+}
+
+export interface UNLOCK_EVENT {
+  type: 'UNLOCK';
+  repository: string;
   passphrase: string;
-}
-
-export interface RESET_EVENT {
-  type: 'RESET';
 }

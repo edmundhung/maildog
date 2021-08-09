@@ -1,41 +1,45 @@
 import { browser } from 'webextension-polyfill-ts';
 import {
-  GET_STATUS_EVENT,
-  SAVE_PASSPHRASE_EVENT,
-  SELECT_REPOSITORY_EVENT,
-  RESET_EVENT,
-  Status,
+  Session,
+  GET_SESSION_EVENT,
+  LOGIN_EVENT,
+  LOGOUT_EVENT,
+  UNLOCK_EVENT,
 } from '../types';
 
-export async function getStatus(): Promise<Status | null> {
-  const message: GET_STATUS_EVENT = {
-    type: 'GET_STATUS',
+export async function getSession(): Promise<Session | null> {
+  const message: GET_SESSION_EVENT = {
+    type: 'GET_SESSION',
   };
   const status = await browser.runtime.sendMessage(message);
 
   return status;
 }
-export async function selectRepository(repo: string): Promise<void> {
-  const message: SELECT_REPOSITORY_EVENT = {
-    type: 'SELECT_REPOSITORY',
-    repo,
+
+export async function login(): Promise<void> {
+  const message: LOGIN_EVENT = {
+    type: 'LOGIN',
   };
 
   await browser.runtime.sendMessage(message);
 }
 
-export async function savePassphase(passphrase: string): Promise<void> {
-  const message: SAVE_PASSPHRASE_EVENT = {
-    type: 'SAVE_PASSPHRASE',
+export async function logout(): Promise<void> {
+  const message: LOGOUT_EVENT = {
+    type: 'LOGOUT',
+  };
+
+  await browser.runtime.sendMessage(message);
+}
+
+export async function unlock(
+  repository: string,
+  passphrase: string,
+): Promise<void> {
+  const message: UNLOCK_EVENT = {
+    type: 'UNLOCK',
+    repository,
     passphrase,
-  };
-
-  await browser.runtime.sendMessage(message);
-}
-
-export async function reset(): Promise<void> {
-  const message: RESET_EVENT = {
-    type: 'RESET',
   };
 
   await browser.runtime.sendMessage(message);
