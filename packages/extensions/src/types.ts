@@ -26,3 +26,9 @@ export interface UNLOCK_EVENT {
   repository: string;
   passphrase: string;
 }
+
+export type Message =
+  | GET_SESSION_EVENT
+  | LOGIN_EVENT
+  | LOGOUT_EVENT
+  | UNLOCK_EVENT;
