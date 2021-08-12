@@ -6,6 +6,7 @@ import NavigationScreen from './NavigationScreen';
 import MainScreen from './MainScreen';
 import * as api from './api';
 import { Status } from '../types';
+import { copyText } from '../utils';
 
 async function showInstallationPage(): Promise<void> {
   await browser.tabs.create({
@@ -42,6 +43,19 @@ function Popup(): React.ReactElement {
     mutationFn: (passphrase: string) => api.unlock(repository, passphrase),
     onSuccess() {
       queryClient.invalidateQueries('GET_SESSION');
+    },
+  });
+  const copyEmail = useMutation({
+    mutationFn: copyText,
+    onSuccess() {
+      window.close();
+    },
+  });
+  const assignNewEmail = useMutation({
+    mutationFn: api.assignNewEmail,
+    onSuccess(email) {
+      queryClient.invalidateQueries('GET_SESSION');
+      copyEmail.mutate(email);
     },
   });
   const login = useMutation({
@@ -94,9 +108,9 @@ function Popup(): React.ReactElement {
       }
       emails={repository === data?.repository ? data?.emails ?? [] : []}
       onNavigate={() => setShowMenu(true)}
-      onNewEmailRequested={() => {}}
+      onNewEmailRequested={assignNewEmail.mutate}
       onPassphraseProvided={unlock.mutate}
-      onOptionUpdate={() => {}}
+      onEmailClicked={copyEmail.mutate}
     />
   );
 }

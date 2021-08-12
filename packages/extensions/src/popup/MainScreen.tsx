@@ -7,7 +7,7 @@ interface MainScreenProps {
   emails: string[];
   onNavigate: () => void;
   onNewEmailRequested: (domain: string) => void;
-  onCopyEmail: (email: string) => void;
+  onEmailClicked: (email: string) => void;
   onPassphraseProvided: (passphrase: string) => void;
   onUpdate: (config: Config) => void;
 }
@@ -18,7 +18,7 @@ function MainScreen({
   emails,
   onNavigate,
   onNewEmailRequested,
-  onCopyEmail,
+  onEmailClicked,
   onPassphraseProvided,
   onOptionUpdate,
 }: Props): React.ReactElement {
@@ -113,7 +113,7 @@ function MainScreen({
                         <button
                           type="button"
                           className="hover:text-secondary focus:outline-white"
-                          onClick={() => onCopyEmail(email)}
+                          onClick={() => onEmailClicked(email)}
                         >
                           {email}
                         </button>

@@ -1,6 +1,14 @@
 import { MachineConfig, createMachine, assign } from 'xstate';
 import { LOGIN_EVENT, LOGOUT_EVENT, UNLOCK_EVENT } from '../types';
-import { login, logout, getOptions, getConfig } from './helpers';
+import { copyText } from '../utils';
+import {
+  login,
+  logout,
+  getOptions,
+  getConfig,
+  saveConfig,
+  getActiveTab,
+} from './helpers';
 
 export interface Context {
   activeTabId: number | null;
@@ -9,6 +17,7 @@ export interface Context {
   options: string[];
   passphrase: string | null;
   config: any | null;
+  sha: string | null;
 }
 
 interface ACTIVATE_TAB_EVENT {
@@ -23,12 +32,18 @@ interface UPDATE_TAB_EVENT {
   tabUrl: string;
 }
 
+interface ASSIGN_NEW_EMAIL_EVENT {
+  type: 'ASSIGN_NEW_EMAIL';
+  email: string;
+}
+
 export type Event =
   | ACTIVATE_TAB_EVENT
   | UPDATE_TAB_EVENT
   | LOGIN_EVENT
   | LOGOUT_EVENT
-  | UNLOCK_EVENT;
+  | UNLOCK_EVENT
+  | ASSIGN_NEW_EMAIL_EVENT;
 
 const machineConfig: MachineConfig<Context, any, Event> = {
   id: 'background',
@@ -39,6 +54,7 @@ const machineConfig: MachineConfig<Context, any, Event> = {
     options: [],
     passphrase: null,
     config: null,
+    sha: null,
   },
   on: {
     ACTIVATE_TAB: {
@@ -74,11 +90,18 @@ const machineConfig: MachineConfig<Context, any, Event> = {
     initializing: {
       invoke: {
         id: 'authenticate',
-        src: () => getOptions(),
+        src: async () => {
+          const options = await getOptions();
+          const tab = await getActiveTab();
+
+          return { options, tab };
+        },
         onDone: {
           target: 'authenticated',
           actions: assign({
-            options: (_, event) => event.data ?? [],
+            options: (_, event) => event.data?.options ?? [],
+            activeTabId: (_, event) => event.data?.tab?.id,
+            activeTabUrl: (_, event) => event.data?.tab?.url,
           }),
         },
         onError: 'unauthenticated',
@@ -97,10 +120,11 @@ const machineConfig: MachineConfig<Context, any, Event> = {
         LOGOUT: {
           target: 'loggingOut',
           actions: assign({
-            repository: () => null,
-            options: () => [],
-            passphrase: () => null,
-            config: () => null,
+            repository: null,
+            options: [],
+            passphrase: null,
+            config: null,
+            sha: null,
           }),
         },
       },
@@ -113,7 +137,8 @@ const machineConfig: MachineConfig<Context, any, Event> = {
               actions: assign({
                 repository: (_, event) => event.repository,
                 passphrase: (_, event) => event.passphrase,
-                config: () => null,
+                config: null,
+                sha: null,
               }),
             },
           },
@@ -125,8 +150,66 @@ const machineConfig: MachineConfig<Context, any, Event> = {
               actions: assign({
                 repository: (_, event) => event.repository,
                 passphrase: (_, event) => event.passphrase,
-                config: () => null,
+                config: null,
+                sha: null,
               }),
+            },
+          },
+          initial: 'idle',
+          states: {
+            idle: {
+              on: {
+                ASSIGN_NEW_EMAIL: {
+                  target: 'updating',
+                  actions: assign({
+                    config: (context, { email }) => {
+                      const [alias, domain] = email.split('@');
+                      const oldConfig = context.config.domains[domain];
+                      const newConfig = {
+                        ...oldConfig,
+                        alias: {
+                          ...oldConfig.alias,
+                          [alias]: {
+                            description: `Generated from web extension at ${new Date().toLocaleString()}`,
+                            website: context.activeTabUrl,
+                          },
+                        },
+                      };
+
+                      const result = {
+                        ...context.config,
+                        domains: {
+                          ...context.config.domains,
+                          [domain]: newConfig,
+                        },
+                      };
+
+                      return result;
+                    },
+                  }),
+                },
+              },
+            },
+            updating: {
+              invoke: {
+                id: 'updating',
+                src: (context) =>
+                  saveConfig(
+                    context.repository,
+                    context.passphrase,
+                    context.config,
+                    context.sha,
+                  ),
+                onDone: {
+                  target: 'idle',
+                  actions: assign({
+                    sha: (_, event) => event.data,
+                  }),
+                },
+                onError: {
+                  target: 'idle',
+                },
+              },
             },
           },
         },
@@ -136,15 +219,20 @@ const machineConfig: MachineConfig<Context, any, Event> = {
             src: (context) => getConfig(context.repository, context.passphrase),
             onDone: {
               target: 'unlocked',
-              actions: assign({
-                config: (context, event) => event.data,
+              actions: assign((_, event) => {
+                const [config, sha] = event.data;
+
+                return {
+                  config,
+                  sha,
+                };
               }),
             },
             onError: {
               target: 'locked',
               actions: assign({
-                repository: () => null,
-                passphrase: () => null,
+                repository: null,
+                passphrase: null,
               }),
             },
           },

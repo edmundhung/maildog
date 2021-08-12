@@ -1,10 +1,17 @@
-import { config, decrypt, readMessage } from 'openpgp/lightweight';
+import {
+  encrypt,
+  decrypt,
+  createMessage,
+  readMessage,
+} from 'openpgp/lightweight';
 import { browser, Tabs } from 'webextension-polyfill-ts';
+import { copyText } from '../utils';
 import { Session, Config } from '../types';
 
-export async function request<T>(path: string): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(
     `${process.env.WEB_URL ?? 'http://localhost:3000'}${path}`,
+    init,
   );
   const body = await response.json();
   const { data, error } = body ?? {};
@@ -22,25 +29,12 @@ export async function getOptions(): Promise<string[]> {
   return repos;
 }
 
-export async function getConfig(
-  repository: string,
+export async function decryptConfig(
+  encryptedConfig: string,
   passphrase: string,
-): Promise<any> {
-  const [owner, repo] = repository.split('/');
-  const searchParams = new URLSearchParams([
-    ['owner', owner],
-    ['repo', repo],
-  ]);
-  const file = await request<{ encoding: string; content: string }>(
-    `/api/config?${searchParams.toString()}`,
-  );
-
-  if (file.encoding !== 'base64') {
-    throw new Error(`Unexpected file encoding: ${file.encoding} returned`);
-  }
-
+): Promise<string> {
   const encryptedMessage = await readMessage({
-    armoredMessage: atob(file.content),
+    armoredMessage: encryptedConfig,
   });
   const { data } = await decrypt({
     message: encryptedMessage,
@@ -48,6 +42,62 @@ export async function getConfig(
   });
 
   return JSON.parse(data);
+}
+
+export async function encryptConfig(
+  config: any,
+  passphrase: string,
+): Promise<string> {
+  const message = await createMessage({
+    text: JSON.stringify(config, null, 2),
+  });
+  const encrypted = await encrypt({
+    message,
+    passwords: [passphrase],
+    format: 'armored',
+  });
+
+  return encrypted;
+}
+
+export async function getConfig(
+  repository: string,
+  passphrase: string,
+): Promise<[any, string]> {
+  const file = await request<{
+    encoding: string;
+    content: string;
+    sha: string;
+  }>(`/api/${repository}/config`);
+
+  if (file.encoding !== 'base64') {
+    throw new Error(`Unexpected file encoding: ${file.encoding} returned`);
+  }
+
+  const config = await decryptConfig(atob(file.content), passphrase);
+
+  return [config, file.sha];
+}
+
+export async function saveConfig(
+  repository: string,
+  passphrase: string,
+  config: any,
+  sha: string,
+): Promise<string> {
+  const encryptedConfig = await encryptConfig(config, passphrase);
+  const updatedSha = await request(`/api/${repository}/config`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sha,
+      content: btoa(encryptedConfig),
+    }),
+  });
+
+  return updatedSha;
 }
 
 export async function openPageInBackground(path: string): Promise<Tabs.Tab> {
@@ -93,6 +143,7 @@ export async function logout(): Promise<void> {
 
 export async function updateContextMenu(
   emailsByDomain: Record<string, string[]>,
+  onAssignNewEmail: (domain: string) => void,
 ): Promise<void> {
   await browser.contextMenus.removeAll();
 
@@ -116,28 +167,45 @@ export async function updateContextMenu(
         id: `maildog-${domain}`,
         parentId: 'maildog',
         title: domain,
+        contexts: ['all'],
       });
     } else {
       browser.contextMenus.create({
         id: `maildog-${domain}`,
         title: `maildog (${domain})`,
+        contexts: ['all'],
       });
     }
 
-    for (const email of emails) {
+    emails.forEach((email) => {
       browser.contextMenus.create({
         id: `maildog-${domain}-${email}`,
         parentId: `maildog-${domain}`,
         title: email,
+        contexts: ['all'],
+        onclick: () => copyText(email),
       });
-    }
+    });
+
+    browser.contextMenus.create({
+      id: `maildog-${domain}-seperator`,
+      parentId: `maildog-${domain}`,
+      type: 'separator',
+      contexts: ['all'],
+    });
 
     browser.contextMenus.create({
       id: `maildog-${domain}-new`,
       parentId: `maildog-${domain}`,
       title: 'Generate email address',
+      contexts: ['all'],
+      onclick: () => onAssignNewEmail(domain),
     });
   }
+}
+
+export function generateNewEmail(domain: string): string {
+  return `${Math.random().toString(36).slice(2)}@${domain}`;
 }
 
 export function getSession(context: Context): Session {
@@ -200,4 +268,10 @@ export function deriveConfigByDomain(
       { recipents: [] },
     ]),
   );
+}
+
+export async function getActiveTab(): Promise<Tabs.Tab> {
+  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+
+  return tab;
 }
