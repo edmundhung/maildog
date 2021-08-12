@@ -1,5 +1,5 @@
 import type { HeadersFunction, Response } from 'remix';
-import { useRouteData, useMatches, json } from 'remix';
+import { useLoaderData, useActionData, useMatches, json } from 'remix';
 
 /**
  * Default HeadersFunction for API Route.
@@ -88,7 +88,8 @@ export function jsonStringify(data: any): string {
  * @returns {string} JSON string
  */
 export function JsonRoute(): string {
-  const data = useRouteData();
+  const loaderData = useLoaderData();
+  const actionData = useActionData();
 
-  return jsonStringify(data);
+  return jsonStringify(actionData ?? loaderData);
 }
