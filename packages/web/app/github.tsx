@@ -91,14 +91,14 @@ export async function listInstalledRepositories(
  * @param owner {string}
  * @param repo {string}
  * @param ref {string} The name of the commit/branch/tag
- * @returns {{ encoding: string; content: string }} config file details
+ * @returns {Promise<{ encoding: string; content: string; sha: string; }>} config file details
  */
 export async function getEncrypedConfig(
   token: string,
   owner: string,
   repo: string,
   ref?: string,
-): { encoding: string; content: string } | null {
+): Promise<{ encoding: string; content: string; sha: string } | null> {
   const octokit = await getUserOctokit(token);
 
   try {
@@ -115,6 +115,7 @@ export async function getEncrypedConfig(
     return {
       encoding: config.data.encoding,
       content: config.data.content,
+      sha: config.data.sha,
     };
   } catch (e) {
     console.log(
@@ -123,5 +124,50 @@ export async function getEncrypedConfig(
       }`,
     );
     return null;
+  }
+}
+
+/**
+ * Save the encrypted config file content in the specific repository
+ * @param token {string} user access token
+ * @param owner {string}
+ * @param repo {string}
+ * @param content {string} content of the encrypted config in base 64 encoding
+ * @param branch {string} The name of the branch committed on
+ * @param sha {shring} The blob SHA of the file being replaced
+ * @returns {Promise<string | null>} Created file sha
+ */
+export async function saveEncryptedConfig(
+  token: string,
+  owner: string,
+  repo: string,
+  content: string,
+  branch?: string,
+  sha?: string,
+): Promise<string | null> {
+  try {
+    const octokit = await getUserOctokit(token);
+    const response = await octokit.request(
+      'PUT /repos/{owner}/{repo}/contents/{path}',
+      {
+        owner,
+        repo,
+        path: 'maildog.config.json.asc',
+        message: 'build(extensions): update config',
+        content,
+        sha,
+        branch,
+      },
+    );
+
+    return response.data?.content?.sha ?? null;
+  } catch (e) {
+    console.log(
+      `[Error] Fail to save config on ${owner}/${repo} at the branch ${
+        branch ?? 'default'
+      }`,
+    );
+
+    throw e;
   }
 }
