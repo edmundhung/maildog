@@ -1,5 +1,6 @@
 export interface Config {
   recipents: string[];
+  pendingEmail: string;
 }
 
 export interface Session {
@@ -27,8 +28,14 @@ export interface UNLOCK_EVENT {
   passphrase: string;
 }
 
+export interface ASSIGN_NEW_EMAIL_EVENT {
+  type: 'ASSIGN_NEW_EMAIL';
+  domain: string;
+}
+
 export type Message =
   | GET_SESSION_EVENT
   | LOGIN_EVENT
   | LOGOUT_EVENT
-  | UNLOCK_EVENT;
+  | UNLOCK_EVENT
+  | ASSIGN_NEW_EMAIL_EVENT;

@@ -6,8 +6,10 @@ import {
   lookupEmails,
   getEmailsByDomain,
   getSession,
+  generateNewEmail,
 } from './helpers';
 import machine, { Context } from './machine';
+import { copyText } from '../utils';
 
 function main() {
   const service = interpret(machine)
@@ -25,7 +27,16 @@ function main() {
         text: emails.length > 0 ? `${emails.length}` : '',
       });
 
-      await updateContextMenu(emailsByDomain);
+      await updateContextMenu(emailsByDomain, (domain) => {
+        const email = generateNewEmail(domain);
+
+        service.send({
+          type: 'ASSIGN_NEW_EMAIL',
+          email,
+        });
+
+        copyText(email);
+      });
     });
 
   browser.browserAction.setBadgeBackgroundColor({ color: '#537780' });
@@ -65,6 +76,20 @@ function main() {
           } else {
             resolve(null);
           }
+          break;
+        case 'ASSIGN_NEW_EMAIL':
+          const email = generateNewEmail(message.domain);
+          const handleAssign = (state: State<Context>) => {
+            if (state.matches('authenticated.unlocked.idle')) {
+              service.off(handleAssign);
+              resolve(email);
+            }
+          };
+
+          service.onTransition(handleAssign).send({
+            type: 'ASSIGN_NEW_EMAIL',
+            email,
+          });
           break;
         case 'UNLOCK':
           const handleUnlock = (state: State<Context>) => {

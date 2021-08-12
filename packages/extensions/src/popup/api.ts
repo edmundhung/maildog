@@ -5,6 +5,7 @@ import {
   LOGIN_EVENT,
   LOGOUT_EVENT,
   UNLOCK_EVENT,
+  ASSIGN_NEW_EMAIL_EVENT,
 } from '../types';
 
 export async function getSession(): Promise<Session | null> {
@@ -43,4 +44,14 @@ export async function unlock(
   };
 
   await browser.runtime.sendMessage(message);
+}
+
+export async function assignNewEmail(domain: string): Promise<string> {
+  const message: ASSIGN_NEW_EMAIL_EVENT = {
+    type: 'ASSIGN_NEW_EMAIL',
+    domain,
+  };
+  const email = await browser.runtime.sendMessage(message);
+
+  return email;
 }
