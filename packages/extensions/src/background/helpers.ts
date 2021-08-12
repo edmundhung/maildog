@@ -149,6 +149,18 @@ export function getSession(context: Context): Session {
   };
 }
 
+export function matchHost(host: string, website: string | undefined): boolean {
+  if (!website) {
+    return false;
+  }
+
+  try {
+    return new URL(website).host === host;
+  } catch (e) {
+    return false;
+  }
+}
+
 export function lookupEmails(config: any, currentUrl: string | null): string[] {
   if (config === null || currentUrl === null) {
     return [];
@@ -158,7 +170,7 @@ export function lookupEmails(config: any, currentUrl: string | null): string[] {
 
   return Object.entries(config.domains).flatMap(([domain, config]) =>
     Object.entries(config.alias ?? {})
-      .filter(([_, rule]) => (rule.website as string).endsWith(url.host))
+      .filter(([_, rule]) => matchHost(url.host, rule.website))
       .map(([prefix]) => `${prefix}@${domain}`),
   );
 }
