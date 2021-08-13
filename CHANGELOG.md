@@ -1,3 +1,26 @@
+## [1.1.2](https://github.com/edmundhung/maildog/compare/v1.1.1...v1.1.2) (2021-08-13)
+
+
+### Bug Fixes
+
+* **extensions:** ensure the extensions refresh badge and context menu after decrypting the config ([39a8f56](https://github.com/edmundhung/maildog/commit/39a8f5636710a0d70bbca5f34d317e200e2cec30))
+* **extensions:** incognito should not share session just like cookie ([881c8e7](https://github.com/edmundhung/maildog/commit/881c8e7d7ade3a02aec7adbf7e01569390242dc4))
+
+
+### Features
+
+* **extensions:** bootstrap extensions setup based on the web-extension-starter ([40c084b](https://github.com/edmundhung/maildog/commit/40c084b755eb64741855ccae949e8f32745bb02d))
+* **extensions:** ensure emails filtering logic compares the host only ([966484d](https://github.com/edmundhung/maildog/commit/966484d648bbbff5bf47c1fc010806071f79adbe))
+* **extensions:** implement decrypt config flow ([c5c73f7](https://github.com/edmundhung/maildog/commit/c5c73f7006a70c2a15ef4c8924bb0a393c33e040))
+* **extensions:** implement generate email functionality ([a03be6d](https://github.com/edmundhung/maildog/commit/a03be6d386a8c497c2bd51222a5f339fa730f637))
+* **extensions:** implement login / logout flow ([de9502e](https://github.com/edmundhung/maildog/commit/de9502e04ef998d3d94f607c122ecaf873ed4a77))
+* **extensions:** keep track of active tab host for looking up emails ([389f560](https://github.com/edmundhung/maildog/commit/389f56069a0a74d6df0310e4a4f662a1401d3432))
+* **extensions:** setup tailwindcss ([91906b4](https://github.com/edmundhung/maildog/commit/91906b4fcd954403a516a5c89ff1cf77fe9f08f8))
+* **extensions:** simplify context menu setup if only 1 domain is configured ([b6308be](https://github.com/edmundhung/maildog/commit/b6308be57617d7361fff30b258a12b78190e35b4))
+* **extensions:** update context menu on tab update ([7502c1d](https://github.com/edmundhung/maildog/commit/7502c1dbd4d5fb97d8905a7970f06ec0fcad7ae7))
+* **web:** add get /config endpoint ([e6f14c7](https://github.com/edmundhung/maildog/commit/e6f14c73b36155ae496d6be8134cd1b058c8f49a))
+* **web:** implement put /api/{owner}/{repo}/config for saving updated config file ([e6f8f3c](https://github.com/edmundhung/maildog/commit/e6f8f3cd968c1201582893c0581bfeb909fdb2d9))
+
 ## [1.1.1](https://github.com/edmundhung/maildog/compare/v1.1.0...v1.1.1) (2021-07-24)
 
 
